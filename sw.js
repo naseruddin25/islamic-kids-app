@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.0.1';
 const CACHE_NAME = `islamic-kids-cache-${CACHE_VERSION}`;
 const CORE_ASSETS = [
   './',
@@ -15,16 +15,33 @@ const CORE_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing version', CACHE_VERSION);
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('[SW] Caching core assets');
+      return cache.addAll(CORE_ASSETS);
+    }).then(() => {
+      console.log('[SW] Install complete, skipping waiting');
+      return self.skipWaiting();
+    }).catch((err) => {
+      console.error('[SW] Install failed:', err);
+      throw err;
+    })
   );
 });
 
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating version', CACHE_VERSION);
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.map((k) => {
-      if (k !== CACHE_NAME) return caches.delete(k);
-    }))).then(() => self.clients.claim())
+    caches.keys().then((keys) => {
+      console.log('[SW] Cleaning old caches:', keys.filter(k => k !== CACHE_NAME));
+      return Promise.all(keys.map((k) => {
+        if (k !== CACHE_NAME) return caches.delete(k);
+      }));
+    }).then(() => {
+      console.log('[SW] Claiming clients');
+      return self.clients.claim();
+    })
   );
 });
 

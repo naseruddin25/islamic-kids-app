@@ -15,10 +15,19 @@
   const writeLastLesson = (id) => { try { localStorage.setItem('lastLessonId', id); } catch {} };
 
   async function loadLessons(){
-    const res = await fetch(LESSONS_URL);
-    if(!res.ok) throw new Error('Failed to load lessons');
-    const data = await res.json();
-    return data.lessons || [];
+    try {
+      const res = await fetch(LESSONS_URL);
+      if(!res.ok) throw new Error('Failed to load lessons');
+      const data = await res.json();
+      return data.lessons || [];
+    } catch(e) {
+      // Fallback: try alternate path
+      const altPath = ASSET_PREFIX ? 'assets/lessons.json' : '../assets/lessons.json';
+      const res = await fetch(altPath);
+      if(!res.ok) throw new Error('Failed to load lessons from fallback path');
+      const data = await res.json();
+      return data.lessons || [];
+    }
   }
 
   function renderFeatured(container){
@@ -78,13 +87,13 @@
     const { id } = getQuery();
     if(!id){
       document.getElementById('lesson-title').textContent = 'Lesson not found';
-      document.getElementById('lesson-body').textContent = 'Missing lesson id.';
+      document.getElementById('lesson-body').innerHTML = 'Missing lesson id. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>';
       return;
     }
     const lesson = findLessonById(id);
     if(!lesson){
       document.getElementById('lesson-title').textContent = 'Lesson not found';
-      document.getElementById('lesson-body').textContent = 'Please go back and choose a lesson.';
+      document.getElementById('lesson-body').innerHTML = 'This lesson doesn\'t exist or hasn\'t loaded yet. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>';
       return;
     }
     writeLastLesson(id);
@@ -128,6 +137,16 @@
       quizScore = correct ? 1 : 0;
       retryBtn.classList.toggle('hidden', correct);
       updateShareButtons();
+
+      // Persist progress locally
+      try {
+        const completed = new Set(JSON.parse(localStorage.getItem('completedLessons')||'[]'));
+        completed.add(lesson.id);
+        localStorage.setItem('completedLessons', JSON.stringify(Array.from(completed)));
+        const scores = JSON.parse(localStorage.getItem('lessonScores')||'{}');
+        scores[lesson.id] = { score: quizScore, total: totalQuestions, ts: Date.now() };
+        localStorage.setItem('lessonScores', JSON.stringify(scores));
+      } catch {}
     };
 
     retryBtn.onclick = () => {
@@ -277,6 +296,8 @@
         const statusEl = document.getElementById('lessons-status');
         const listEl = document.getElementById('lesson-list');
         const { q } = getQuery();
+        // Show loading state initially
+        listEl.innerHTML = '<div class="card"><strong>Loading lessons…</strong><p class="small">Please wait a moment.</p></div>';
         renderLessonsList(listEl, statusEl, q);
         const input = document.getElementById('lessons-search');
         input.value = q || '';
@@ -319,7 +340,7 @@
       }
       if(page === 'lesson'){
         document.getElementById('lesson-title').textContent = offline?'Offline':'Something went wrong';
-        document.getElementById('lesson-body').textContent = offline?'You’re offline. Reconnect to load lesson content.':'Please go back and try again.';
+        document.getElementById('lesson-body').innerHTML = offline?'You\'re offline. Reconnect to load lesson content. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>':'Couldn\'t load lesson data. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>';
       }
     });
   }
