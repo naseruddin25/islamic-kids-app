@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1.0.1';
+const CACHE_VERSION = 'v1.0.2';
 const CACHE_NAME = `islamic-kids-cache-${CACHE_VERSION}`;
 const CORE_ASSETS = [
   './',
