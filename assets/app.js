@@ -15,19 +15,24 @@
   const writeLastLesson = (id) => { try { localStorage.setItem('lastLessonId', id); } catch {} };
 
   async function loadLessons(){
-    try {
-      const res = await fetch(LESSONS_URL);
-      if(!res.ok) throw new Error('Failed to load lessons');
-      const data = await res.json();
-      return data.lessons || [];
-    } catch(e) {
-      // Fallback: try alternate path
-      const altPath = ASSET_PREFIX ? 'assets/lessons.json' : '../assets/lessons.json';
-      const res = await fetch(altPath);
-      if(!res.ok) throw new Error('Failed to load lessons from fallback path');
-      const data = await res.json();
-      return data.lessons || [];
+    const paths = ['../assets/lessons.json', './assets/lessons.json'];
+    let lastError = null;
+    
+    for(const path of paths){
+      try {
+        const res = await fetch(path);
+        if(res.ok){
+          const data = await res.json();
+          console.log(`[loadLessons] Loaded from ${path}`);
+          return data.lessons || [];
+        }
+        lastError = `${path}: HTTP ${res.status}`;
+      } catch(e) {
+        lastError = `${path}: ${e.message}`;
+      }
     }
+    
+    throw new Error(`Failed to load lessons from any path. Tried: ${paths.join(', ')}. Last error: ${lastError}`);
   }
 
   function renderFeatured(container){
@@ -326,17 +331,23 @@
         }
       }
     }).catch(err => {
-      console.error(err);
+      console.error('[loadLessons error]', err);
       const offline = !navigator.onLine;
+      const errorMsg = err.message || 'Unknown error';
+      
       if(page === 'home'){
         const featuredEl = document.getElementById('home-featured');
-        featuredEl.innerHTML = `<div class="card error-card"><strong>${offline?'Offline':'Error loading content'}</strong><p>${offline?'You're offline. Content you've already opened is still available.':'Unable to load lessons right now. Check your connection and refresh.'}</p></div>`;
+        featuredEl.innerHTML = `<div class="card error-card"><strong>${offline?'Offline':'Error loading lessons'}</strong><p>${offline?'You're offline. Content you've already opened is still available.':errorMsg}</p></div>`;
       }
       if(page === 'lessons'){
         const statusEl = document.getElementById('lessons-status');
         const listEl = document.getElementById('lesson-list');
         statusEl.textContent = '';
-        listEl.innerHTML = `<div class="card error-card"><strong>${offline?'Offline':'Error loading content'}</strong><p>${offline?'You're offline. Content you've already opened is still available.':'Unable to load lessons right now. Check your connection and refresh.'}</p></div>`;
+        listEl.innerHTML = `<div class="card error-card">
+          <strong>${offline?'Offline':'Couldn't load lessons'}</strong>
+          <p>${offline?'You're offline. Content you've already opened is still available.':'Check that assets/lessons.json exists and that relative paths are correct for /lessons/.'}</p>
+          ${offline?'':`<details style="margin-top:12px;"><summary style="cursor:pointer;color:#666;">Technical details</summary><pre style="margin-top:8px;font-size:0.85em;color:#666;white-space:pre-wrap;">${errorMsg}</pre></details>`}
+        </div>`;
       }
       if(page === 'lesson'){
         document.getElementById('lesson-title').textContent = offline?'Offline':'Error loading lesson';
