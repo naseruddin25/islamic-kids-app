@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="site-base" content="/islamic-kids-app">
   <title>Teen Deen - Learn Islamic Concepts Online</title>
   <link rel="stylesheet" href="assets/styles.css">
@@ -22,10 +22,31 @@
         <a href="parents.html" class="nav-pill">Parents</a>
         <a href="progress.html" class="nav-pill">Progress</a>
       </nav>
+      <button class="navbar-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span>
+          <div></div>
+        </span>
+      </button>
       <div class="navbar-right">
         <button class="cta-btn" id="start-btn">Start Learning</button>
       </div>
     </nav>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="navbar-drawer" role="dialog" aria-modal="true" aria-label="Navigation menu">
+      <div class="navbar-drawer-content">
+        <div class="navbar-drawer-header">
+          <span style="font-weight: 600; color: var(--color-text);">Menu</span>
+          <button class="navbar-drawer-close" aria-label="Close menu">✕</button>
+        </div>
+        <nav class="navbar-drawer-nav" aria-label="Primary navigation">
+          <a href="./" class="nav-pill" aria-current="page">Discover</a>
+          <a href="lessons/" class="nav-pill">Lessons</a>
+          <a href="parents.html" class="nav-pill">Parents</a>
+          <a href="progress.html" class="nav-pill">Progress</a>
+        </nav>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -91,6 +112,7 @@
   <script src="assets/progress.js"></script>
   <script src="assets/confetti.js"></script>
   <script src="assets/app.js"></script>
+  <script src="assets/mobile-nav.js"></script>
   <script src="assets/main.js" defer></script>
   <script>
     // Update progress stats on home page
@@ -110,7 +132,7 @@
       const startBtn = document.getElementById('start-btn');
       if (startBtn) {
         startBtn.addEventListener('click', () => {
-          window.location.href = 'lessons/';
+          window.location.href = window.withBase ? window.withBase('lessons/') : 'lessons/';
         });
       }
     });
