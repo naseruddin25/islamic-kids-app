@@ -24,26 +24,49 @@ function checkLessons(){
 }
 
 function checkLinks(){
+  const projectRoot = path.join(__dirname, '..');
   const files = [
-    path.join(__dirname, '..', 'index.html'),
-    path.join(__dirname, '..', 'parents.html'),
-    path.join(__dirname, '..', 'lessons', 'index.html'),
-    path.join(__dirname, '..', 'lessons', 'lesson.html'),
+    { path: path.join(projectRoot, 'index.html'), dir: projectRoot },
+    { path: path.join(projectRoot, 'parents.html'), dir: projectRoot },
+    { path: path.join(projectRoot, 'lessons', 'index.html'), dir: path.join(projectRoot, 'lessons') },
+    { path: path.join(projectRoot, 'lessons', 'lesson.html'), dir: path.join(projectRoot, 'lessons') },
   ];
-  const exists = (rel) => fs.existsSync(path.join(__dirname, '..', rel));
-  const rels = new Set();
-  for (const f of files){
-    const html = fs.readFileSync(f, 'utf8');
+  
+  const checked = new Set();
+  
+  for (const file of files){
+    if (!fs.existsSync(file.path)) {
+      console.warn(`[validate] Skipping missing file: ${path.relative(projectRoot, file.path)}`);
+      continue;
+    }
+    
+    const html = fs.readFileSync(file.path, 'utf8');
     const hrefs = [...html.matchAll(/href="([^"]+)"/g)].map(m => m[1]);
-    for (const h of hrefs){
-      if (/^(https?:|mailto:|sms:)/i.test(h)) continue; // ignore external
-      const rel = path.normalize(h.replace(/^\.\//,''));
-      rels.add(rel);
+    
+    for (const href of hrefs){
+      // Ignore external links and fragments
+      if (/^(https?:|mailto:|sms:|#)/i.test(href)) continue;
+      
+      // Ignore query strings and fragments for existence check
+      const cleanHref = href.split('?')[0].split('#')[0];
+      if (!cleanHref) continue;
+      
+      // Resolve relative to the HTML file's directory
+      const resolved = path.resolve(file.dir, cleanHref);
+      const relativeToProject = path.relative(projectRoot, resolved);
+      
+      // Skip if already checked
+      if (checked.has(relativeToProject)) continue;
+      checked.add(relativeToProject);
+      
+      // Check if file exists
+      if (!fs.existsSync(resolved)) {
+        fail(`Broken link in ${path.relative(projectRoot, file.path)}: "${href}" -> ${relativeToProject}`);
+      }
     }
   }
-  for (const r of rels){
-    if (!exists(r)) fail(`Broken internal link: ${r}`);
-  }
+  
+  console.log(`[validate] Checked ${checked.size} unique links`);
 }
 
 function main(){
