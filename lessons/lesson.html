@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="site-base" content="/islamic-kids-app">
   <title>Lesson | Teen Deen</title>
   <link rel="stylesheet" href="../assets/styles.css">
@@ -21,10 +21,31 @@
         <a href="../parents.html" class="nav-pill">Parents</a>
         <a href="../progress.html" class="nav-pill">Progress</a>
       </nav>
+      <button class="navbar-hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span>
+          <div></div>
+        </span>
+      </button>
       <div class="navbar-right">
         <a href="./" class="cta-btn">Back to Lessons</a>
       </div>
     </nav>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="navbar-drawer" role="dialog" aria-modal="true" aria-label="Navigation menu">
+      <div class="navbar-drawer-content">
+        <div class="navbar-drawer-header">
+          <span style="font-weight: 600; color: var(--color-text);">Menu</span>
+          <button class="navbar-drawer-close" aria-label="Close menu">✕</button>
+        </div>
+        <nav class="navbar-drawer-nav" aria-label="Primary navigation">
+          <a href="../" class="nav-pill">Discover</a>
+          <a href="./" class="nav-pill" aria-current="page">Lessons</a>
+          <a href="../parents.html" class="nav-pill">Parents</a>
+          <a href="../progress.html" class="nav-pill">Progress</a>
+        </nav>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -59,9 +80,11 @@
       <div class="card">
         <div id="quiz-options" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;"></div>
         <div id="quiz-result" class="hidden" style="padding: 16px; border-radius: var(--radius-md); margin-bottom: 20px; background: var(--color-bg-warm);"></div>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button id="quiz-submit" class="cta-btn">Check Answer</button>
-          <button id="quiz-retry" class="btn-inline hidden" style="background: var(--color-surface); border: 1px solid var(--color-border);">Try Again</button>
+        <div id="quiz-actions" class="quiz-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button id="quiz-submit" class="cta-btn">Submit Quiz</button>
+          <button id="quiz-retry" class="btn-inline hidden">Try Again</button>
+          <button id="quiz-review" class="btn-inline hidden">Review Answers</button>
+          <button id="quiz-back-to-top" class="btn-inline hidden">Back to Top</button>
         </div>
       </div>
     </section>
@@ -92,6 +115,7 @@
   <script src="../assets/tts.js"></script>
   <script src="../assets/certificate.js"></script>
   <script src="../assets/quiz.js"></script>
+  <script src="../assets/mobile-nav.js"></script>
   <script src="../assets/app.js"></script>
 </body>
 </html>
