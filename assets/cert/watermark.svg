@@ -1,0 +1,17 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <defs>
+    <pattern id="watermark" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+      <!-- Crescent moon -->
+      <g opacity="0.08">
+        <circle cx="50" cy="50" r="25" fill="#FF9F43"/>
+        <circle cx="58" cy="50" r="25" fill="#fff7ec"/>
+      </g>
+      <!-- Stars -->
+      <g opacity="0.08">
+        <polygon points="30,30 32,36 38,36 33,40 35,46 30,42 25,46 27,40 22,36 28,36" fill="#FF9F43"/>
+        <polygon points="70,70 72,76 78,76 73,80 75,86 70,82 65,86 67,80 62,76 68,76" fill="#FF9F43"/>
+      </g>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#watermark)"/>
+</svg>
