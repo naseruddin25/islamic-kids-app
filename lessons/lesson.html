@@ -64,6 +64,9 @@
     <!-- LESSON CONTENT -->
     <section class="content-section">
       <div class="card">
+        <!-- AUDIO PLAYER (inserted here by app.js) -->
+        <div id="audio-player-container" style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--color-border);"></div>
+
         <h2 style="margin-top: 0;">Overview</h2>
         <div id="lesson-body" class="lesson-content" style="font-size: var(--text-base); line-height: 1.6; color: var(--color-text);">
           <p>Loading content…</p>
@@ -78,13 +81,25 @@
         <h2 class="section-title">Check Your Understanding</h2>
       </div>
       <div class="card">
-        <div id="quiz-options" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;"></div>
-        <div id="quiz-result" class="hidden" style="padding: 16px; border-radius: var(--radius-md); margin-bottom: 20px; background: var(--color-bg-warm);"></div>
-        <div id="quiz-actions" class="quiz-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button id="quiz-submit" class="cta-btn">Submit Quiz</button>
-          <button id="quiz-retry" class="btn-inline hidden">Try Again</button>
-          <button id="quiz-review" class="btn-inline hidden">Review Answers</button>
-          <button id="quiz-back-to-top" class="btn-inline hidden">Back to Top</button>
+        <!-- Quiz CTA (will be replaced by quiz.js if questions exist) -->
+        <div id="quiz-cta-container" class="quiz-cta-card">
+          <div style="text-align: center;">
+            <h3 style="margin: 0 0 8px 0; font-size: 1.25em; color: var(--color-text);">Ready to test your knowledge?</h3>
+            <p style="margin: 0 0 16px 0; color: var(--color-text-muted); font-size: 1.025em;">Take the quiz to check what you learned.</p>
+            <button id="quiz-cta-button" class="cta-btn" style="margin: 0 auto; display: inline-block;">📋 Take the Quiz</button>
+          </div>
+        </div>
+
+        <!-- Quiz questions (hidden by default) -->
+        <div id="quiz-questions-wrapper" style="display: none;">
+          <div id="quiz-options" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;"></div>
+          <div id="quiz-result" class="hidden" style="padding: 16px; border-radius: var(--radius-md); margin-bottom: 20px; background: var(--color-bg-warm);"></div>
+          <div id="quiz-actions" class="quiz-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button id="quiz-submit" class="cta-btn">Submit Quiz</button>
+            <button id="quiz-retry" class="btn-inline hidden">Try Again</button>
+            <button id="quiz-review" class="btn-inline hidden">Review Answers</button>
+            <button id="quiz-back-to-top" class="btn-inline hidden">Back to Top</button>
+          </div>
         </div>
       </div>
     </section>
