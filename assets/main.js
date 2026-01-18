@@ -224,6 +224,18 @@
       if (sectionTitle && sectionTitle.textContent.includes('Browse')) {
         sectionTitle.textContent = 'All Quizzes';
       }
+      
+      // Update nav highlighting: remove from Lessons, add to Quizzes
+      const navLinks = document.querySelectorAll('.navbar-nav .nav-pill');
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        // Remove aria-current from all links first
+        link.removeAttribute('aria-current');
+        // Add it to Quizzes link (contains ?mode=quiz)
+        if (href && href.includes('mode=quiz')) {
+          link.setAttribute('aria-current', 'page');
+        }
+      });
     }
     
     try {
