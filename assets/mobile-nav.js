@@ -19,21 +19,30 @@
       return;
     }
 
+    const openDrawer = () => {
+      drawer.classList.add('open');
+      hamburger.classList.add('open');
+      hamburger.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeDrawer = () => {
+      drawer.classList.remove('open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    };
+
     // Open drawer
     hamburger.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      drawer.classList.add('open');
-      hamburger.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      if (drawer.classList.contains('open')) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
     });
-
-    // Close drawer
-    function closeDrawer() {
-      drawer.classList.remove('open');
-      hamburger.classList.remove('open');
-      document.body.style.overflow = '';
-    }
 
     // Close button
     if (drawerClose) {
