@@ -11,20 +11,14 @@
 (function() {
   'use strict';
 
-  // Check if we're on lesson-01 page
-  const params = new URLSearchParams(window.location.search);
-  const lessonId = params.get('id');
-  
-  if (lessonId !== 'lesson-01') {
-    console.log('[Lesson 01 Interactive] Not lesson-01, skipping initialization');
-    return; // Exit early if not lesson-01
-  }
+  console.log('[Lesson 01 Interactive] Script loaded');
 
   // Prevent duplicate initialization
-  if (window.__teenDeenLesson01Init) return;
+  if (window.__teenDeenLesson01Init) {
+    console.log('[Lesson 01 Interactive] Already initialized, skipping');
+    return;
+  }
   window.__teenDeenLesson01Init = true;
-
-  console.log('[Lesson 01 Interactive] Initializing for lesson-01...');
 
   // Quiz configuration
   const QUIZ_CONFIG = {
@@ -103,17 +97,36 @@
     passed: false
   };
 
-  // Initialize when DOM is ready and quiz-options element exists
-  function init() {
-    console.log('[Lesson 01 Interactive] Waiting for quiz-options element...');
+  // Check if this is lesson-01
+  function checkLessonId() {
+    const params = new URLSearchParams(window.location.search);
+    const lessonId = params.get('id');
+    console.log('[Lesson 01 Interactive] Detected lesson ID:', lessonId);
+    return lessonId === 'lesson-01';
+  }
+
+  // Initialize when conditions are met
+  function tryInitialize() {
+    console.log('[Lesson 01 Interactive] Attempting to initialize...');
     
-    // Wait for quiz-options element to exist (app.js creates this)
+    if (!checkLessonId()) {
+      console.log('[Lesson 01 Interactive] Not lesson-01, exiting');
+      return;
+    }
+
+    console.log('[Lesson 01 Interactive] This is lesson-01, looking for quiz-options element...');
+    
+    // Look for quiz-options element
+    let attempts = 0;
+    const maxAttempts = 100; // 5 seconds
+    
     const checkQuizOptions = setInterval(() => {
+      attempts++;
       const quizOptions = document.getElementById('quiz-options');
       
       if (quizOptions) {
         clearInterval(checkQuizOptions);
-        console.log('[Lesson 01 Interactive] quiz-options found, rendering custom quiz');
+        console.log('[Lesson 01 Interactive] Found quiz-options element, rendering quiz');
         
         // Make sure parent section is visible
         const quizSection = document.getElementById('quiz-section');
@@ -124,16 +137,11 @@
         renderQuiz();
         initReflectSection();
         loadSavedData();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(checkQuizOptions);
+        console.error('[Lesson 01 Interactive] Timeout: quiz-options element not found after', attempts, 'attempts');
       }
     }, 50);
-
-    // Timeout after 5 seconds
-    setTimeout(() => {
-      clearInterval(checkQuizOptions);
-      if (!document.getElementById('quiz-options')) {
-        console.error('[Lesson 01 Interactive] Timeout: quiz-options element never appeared. Check lesson.html template.');
-      }
-    }, 5000);
   }
 
   // Render quiz UI - replaces the content of quiz-options element
@@ -199,6 +207,12 @@
     // Replace quiz-options content
     quizOptions.innerHTML = quizHTML;
     console.log('[Lesson 01 Interactive] Quiz HTML injected into quiz-options');
+
+    // Hide default quiz buttons
+    const defaultSubmit = document.getElementById('quiz-submit');
+    const defaultRetry = document.getElementById('quiz-retry');
+    if (defaultSubmit) defaultSubmit.style.display = 'none';
+    if (defaultRetry) defaultRetry.style.display = 'none';
 
     // Add event listeners
     document.getElementById('quiz-submit-btn').addEventListener('click', handleSubmit);
@@ -499,96 +513,43 @@ Teen Deen • Islamic Learning for Teens
   }
 
   // Handle copy results
-  async function handleCopyResults() {
+  function handleCopyResults() {
     const resultsText = buildResultsText();
-    const statusDiv = document.getElementById('share-status');
-
-    try {
-      // Try modern clipboard API
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(resultsText);
-        statusDiv.textContent = '✓ Copied to clipboard!';
-        statusDiv.style.color = '#06d6a0';
-      } else {
-        // Fallback for older browsers
-        const textarea = document.createElement('textarea');
-        textarea.value = resultsText;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        statusDiv.textContent = '✓ Copied!';
-        statusDiv.style.color = '#06d6a0';
-      }
-
+    navigator.clipboard.writeText(resultsText).then(() => {
+      const statusEl = document.getElementById('share-status');
+      statusEl.textContent = '✓ Results copied to clipboard!';
       setTimeout(() => {
-        statusDiv.textContent = '';
+        statusEl.textContent = '';
       }, 3000);
-    } catch (err) {
+    }).catch(err => {
       console.error('[Share] Copy failed:', err);
-      statusDiv.textContent = '✗ Copy failed. Please select and copy manually.';
-      statusDiv.style.color = '#ef476f';
-    }
+      const statusEl = document.getElementById('share-status');
+      statusEl.textContent = '✗ Failed to copy. Try again.';
+    });
   }
 
   // Handle email results
   function handleEmailResults() {
     const resultsText = buildResultsText();
-    const subject = `Teen Deen — ${QUIZ_CONFIG.lessonTitle} Results`;
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(resultsText)}`;
-    
-    try {
-      window.location.href = mailtoLink;
-      const statusDiv = document.getElementById('share-status');
-      statusDiv.textContent = '✓ Opening email app...';
-      statusDiv.style.color = '#06d6a0';
-      setTimeout(() => {
-        statusDiv.textContent = '';
-      }, 3000);
-    } catch (err) {
-      console.error('[Share] Email failed:', err);
-    }
+    const subject = encodeURIComponent('Teen Deen Lesson Completion');
+    const body = encodeURIComponent(resultsText);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
 
-  // Handle Web Share API
-  async function handleWebShare() {
+  // Handle web share
+  function handleWebShare() {
     const resultsText = buildResultsText();
-    const statusDiv = document.getElementById('share-status');
-
-    try {
-      await navigator.share({
-        title: `Teen Deen — ${QUIZ_CONFIG.lessonTitle}`,
+    if (navigator.share) {
+      navigator.share({
+        title: 'Teen Deen Lesson Completed',
         text: resultsText
+      }).catch(err => {
+        console.log('[Share] Web share cancelled or failed:', err);
       });
-      statusDiv.textContent = '✓ Shared successfully!';
-      statusDiv.style.color = '#06d6a0';
-      setTimeout(() => {
-        statusDiv.textContent = '';
-      }, 3000);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.error('[Share] Web Share failed:', err);
-        statusDiv.textContent = '✗ Share cancelled or failed';
-        statusDiv.style.color = '#ef476f';
-        setTimeout(() => {
-          statusDiv.textContent = '';
-        }, 3000);
-      }
     }
   }
 
-  // Utility: Save to localStorage with error handling
-  function saveToLocalStorage(key, value) {
-    try {
-      localStorage.setItem(key, value);
-    } catch (err) {
-      console.warn(`[Storage] Failed to save ${key}:`, err);
-    }
-  }
-
-  // Utility: Debounce function
+  // Utility: debounce
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -601,11 +562,20 @@ Teen Deen • Islamic Learning for Teens
     };
   }
 
-  // Start initialization when DOM is ready
+  // Utility: save to localStorage
+  function saveToLocalStorage(key, value) {
+    try {
+      localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+    } catch (err) {
+      console.warn('[Storage] Failed to save:', key, err);
+    }
+  }
+
+  // Start initialization
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', tryInitialize);
   } else {
-    init();
+    tryInitialize();
   }
 
 })();
