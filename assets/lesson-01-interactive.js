@@ -103,18 +103,23 @@
     passed: false
   };
 
-  // Initialize when DOM is ready and quiz section exists
+  // Initialize when DOM is ready and quiz-options element exists
   function init() {
-    // Wait for quiz section to exist (don't need it to be populated)
-    const checkQuizSection = setInterval(() => {
-      const quizSection = document.getElementById('quiz-section');
+    console.log('[Lesson 01 Interactive] Waiting for quiz-options element...');
+    
+    // Wait for quiz-options element to exist (app.js creates this)
+    const checkQuizOptions = setInterval(() => {
+      const quizOptions = document.getElementById('quiz-options');
       
-      if (quizSection) {
-        clearInterval(checkQuizSection);
-        console.log('[Lesson 01 Interactive] Quiz section found, rendering custom quiz');
+      if (quizOptions) {
+        clearInterval(checkQuizOptions);
+        console.log('[Lesson 01 Interactive] quiz-options found, rendering custom quiz');
         
-        // Make sure section is visible
-        quizSection.style.display = 'block';
+        // Make sure parent section is visible
+        const quizSection = document.getElementById('quiz-section');
+        if (quizSection) {
+          quizSection.style.display = 'block';
+        }
         
         renderQuiz();
         initReflectSection();
@@ -122,33 +127,24 @@
       }
     }, 50);
 
-    // Timeout after 3 seconds
+    // Timeout after 5 seconds
     setTimeout(() => {
-      clearInterval(checkQuizSection);
-      console.warn('[Lesson 01 Interactive] Timeout waiting for quiz section');
-    }, 3000);
+      clearInterval(checkQuizOptions);
+      if (!document.getElementById('quiz-options')) {
+        console.error('[Lesson 01 Interactive] Timeout: quiz-options element never appeared. Check lesson.html template.');
+      }
+    }, 5000);
   }
 
-  // Render quiz UI
+  // Render quiz UI - replaces the content of quiz-options element
   function renderQuiz() {
-    const quizSection = document.getElementById('quiz-section');
-    if (!quizSection) return;
-
-    // Find the card div inside quiz section
-    const card = quizSection.querySelector('.card');
-    if (!card) {
-      console.warn('[Lesson 01 Interactive] Card not found in quiz section');
+    const quizOptions = document.getElementById('quiz-options');
+    if (!quizOptions) {
+      console.error('[Lesson 01 Interactive] quiz-options element not found');
       return;
     }
 
     const quizHTML = `
-      <h3 style="color: var(--color-primary, #ff9f43); margin: 0 0 16px 0; font-size: 1.3em;">
-        📝 Knowledge Check
-      </h3>
-      <p style="margin: 0 0 24px 0; color: var(--color-text-muted, #6c5a4d);">
-        Answer all 5 questions to check your understanding.
-      </p>
-
       <!-- Quiz Questions -->
       <div id="quiz-questions" style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 24px;">
         ${QUIZ_CONFIG.questions.map((q, index) => renderQuestion(q, index)).join('')}
@@ -200,8 +196,9 @@
       </div>
     `;
 
-    // Replace card content (not the entire quiz section)
-    card.innerHTML = quizHTML;
+    // Replace quiz-options content
+    quizOptions.innerHTML = quizHTML;
+    console.log('[Lesson 01 Interactive] Quiz HTML injected into quiz-options');
 
     // Add event listeners
     document.getElementById('quiz-submit-btn').addEventListener('click', handleSubmit);
@@ -340,6 +337,20 @@
     sharingSection.classList.remove('hidden');
     sharingSection.style.display = 'block';
 
+    // Trigger confetti celebration
+    if (quizState.passed && window.TeenDeenConfetti) {
+      setTimeout(() => window.TeenDeenConfetti.celebrate(), 300);
+    }
+
+    // Update progress tracking
+    if (window.TeenDeenProgress) {
+      try {
+        window.TeenDeenProgress.completeLesson(QUIZ_CONFIG.lessonId, score, QUIZ_CONFIG.questions.length);
+      } catch (err) {
+        console.warn('[Quiz] Progress tracking error:', err);
+      }
+    }
+
     // Trigger certificate if passed
     if (quizState.passed && window.TeenDeenCertificate) {
       try {
@@ -426,6 +437,43 @@
     }
   }
 
+  // Initialize reflection section
+  function initReflectSection() {
+    const reflectSection = document.getElementById('reflect-section');
+    if (!reflectSection) return;
+
+    const textareas = reflectSection.querySelectorAll('textarea');
+    textareas.forEach((textarea, index) => {
+      const storageKey = `teenDeen.lesson-01.reflect.${index}`;
+      
+      // Load saved value
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) textarea.value = saved;
+      } catch (err) {
+        console.warn('[Reflect] Load error:', err);
+      }
+
+      // Save on input with debounce
+      textarea.addEventListener('input', debounce((e) => {
+        saveToLocalStorage(storageKey, e.target.value);
+      }, 500));
+    });
+  }
+
+  // Load saved data
+  function loadSavedData() {
+    try {
+      const savedName = localStorage.getItem('teenDeen.studentName');
+      const nameInput = document.getElementById('student-name-input');
+      if (savedName && nameInput) {
+        nameInput.value = savedName;
+      }
+    } catch (err) {
+      console.warn('[Load] Error loading saved data:', err);
+    }
+  }
+
   // Build results text for sharing
   function buildResultsText() {
     const studentName = document.getElementById('student-name-input').value.trim() || 'Student';
@@ -504,122 +552,43 @@ Teen Deen • Islamic Learning for Teens
     }
   }
 
-  // Handle web share
+  // Handle Web Share API
   async function handleWebShare() {
     const resultsText = buildResultsText();
     const statusDiv = document.getElementById('share-status');
 
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: 'Teen Deen Lesson Results',
-          text: resultsText,
-          url: window.location.href
-        });
-        statusDiv.textContent = '✓ Shared successfully!';
-        statusDiv.style.color = '#06d6a0';
-      } else {
-        // Fallback to copy
-        await handleCopyResults();
-        statusDiv.textContent = '⚠️ Sharing not supported. Results copied instead.';
-        statusDiv.style.color = '#b88900';
-      }
-
+      await navigator.share({
+        title: `Teen Deen — ${QUIZ_CONFIG.lessonTitle}`,
+        text: resultsText
+      });
+      statusDiv.textContent = '✓ Shared successfully!';
+      statusDiv.style.color = '#06d6a0';
       setTimeout(() => {
         statusDiv.textContent = '';
       }, 3000);
     } catch (err) {
       if (err.name !== 'AbortError') {
-        console.error('[Share] Web share failed:', err);
-        // Fallback to copy
-        await handleCopyResults();
+        console.error('[Share] Web Share failed:', err);
+        statusDiv.textContent = '✗ Share cancelled or failed';
+        statusDiv.style.color = '#ef476f';
+        setTimeout(() => {
+          statusDiv.textContent = '';
+        }, 3000);
       }
     }
   }
 
-  // Initialize reflect section
-  function initReflectSection() {
-    const textareas = document.querySelectorAll('.lesson-content textarea');
-    
-    if (textareas.length === 0) {
-      console.warn('[Reflect] No textareas found');
-      return;
-    }
-
-    // Add helper text after last textarea's parent
-    const lastTextareaParent = textareas[textareas.length - 1].closest('div[style*="padding"]');
-    if (lastTextareaParent && lastTextareaParent.parentElement) {
-      const helperText = document.createElement('p');
-      helperText.style.cssText = 'margin: 16px 0 0 0; font-size: 0.85em; color: var(--color-text-muted, #6c5a4d); font-style: italic;';
-      helperText.textContent = '💾 Your reflections save automatically on this device.';
-      lastTextareaParent.parentElement.appendChild(helperText);
-    }
-
-    // Add event listeners for each textarea
-    textareas.forEach((textarea, index) => {
-      const key = `teenDeen.lesson-01.reflect.${index + 1}`;
-      
-      // Load saved value
-      const saved = loadFromLocalStorage(key);
-      if (saved) {
-        textarea.value = saved;
-      }
-
-      // Save on input (debounced)
-      textarea.addEventListener('input', debounce((e) => {
-        saveToLocalStorage(key, e.target.value);
-        console.log(`[Reflect] Saved reflection ${index + 1}`);
-      }, 500));
-
-      // Improve textarea UX
-      textarea.style.transition = 'border-color 150ms ease, box-shadow 150ms ease';
-      textarea.addEventListener('focus', function() {
-        this.style.borderColor = 'var(--color-primary, #ff9f43)';
-        this.style.boxShadow = '0 0 0 3px rgba(255, 159, 67, 0.1)';
-      });
-      textarea.addEventListener('blur', function() {
-        this.style.borderColor = 'var(--color-border, rgba(0,0,0,0.08))';
-        this.style.boxShadow = 'none';
-      });
-    });
-  }
-
-  // Load saved data from localStorage
-  function loadSavedData() {
-    // Load student name
-    const savedName = loadFromLocalStorage('teenDeen.studentName');
-    const nameInput = document.getElementById('student-name-input');
-    if (savedName && nameInput) {
-      nameInput.value = savedName;
-    }
-
-    // Load previous score (if page refresh)
-    const savedScore = loadFromLocalStorage('teenDeen.lesson-01.score');
-    if (savedScore !== null) {
-      console.log('[Quiz] Found saved score:', savedScore);
-    }
-  }
-
-  // localStorage helpers
+  // Utility: Save to localStorage with error handling
   function saveToLocalStorage(key, value) {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem(key, value);
     } catch (err) {
-      console.warn('[localStorage] Save failed:', err);
+      console.warn(`[Storage] Failed to save ${key}:`, err);
     }
   }
 
-  function loadFromLocalStorage(key) {
-    try {
-      const value = localStorage.getItem(key);
-      return value ? JSON.parse(value) : null;
-    } catch (err) {
-      console.warn('[localStorage] Load failed:', err);
-      return null;
-    }
-  }
-
-  // Debounce utility
+  // Utility: Debounce function
   function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
