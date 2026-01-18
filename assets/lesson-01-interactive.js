@@ -105,24 +105,28 @@
 
   // Initialize when DOM is ready and quiz section exists
   function init() {
-    // Wait for quiz section to exist (app.js needs to render it first)
+    // Wait for quiz section to exist (don't need it to be populated)
     const checkQuizSection = setInterval(() => {
       const quizSection = document.getElementById('quiz-section');
-      const quizOptions = document.getElementById('quiz-options');
       
-      if (quizSection && quizOptions && quizOptions.innerHTML.trim() !== '') {
+      if (quizSection) {
         clearInterval(checkQuizSection);
-        console.log('[Lesson 01 Interactive] Quiz section ready, replacing with custom quiz');
+        console.log('[Lesson 01 Interactive] Quiz section found, rendering custom quiz');
+        
+        // Make sure section is visible
+        quizSection.style.display = 'block';
+        
         renderQuiz();
         initReflectSection();
         loadSavedData();
       }
-    }, 100);
+    }, 50);
 
-    // Timeout after 5 seconds
+    // Timeout after 3 seconds
     setTimeout(() => {
       clearInterval(checkQuizSection);
-    }, 5000);
+      console.warn('[Lesson 01 Interactive] Timeout waiting for quiz section');
+    }, 3000);
   }
 
   // Render quiz UI
@@ -132,7 +136,10 @@
 
     // Find the card div inside quiz section
     const card = quizSection.querySelector('.card');
-    if (!card) return;
+    if (!card) {
+      console.warn('[Lesson 01 Interactive] Card not found in quiz section');
+      return;
+    }
 
     const quizHTML = `
       <h3 style="color: var(--color-primary, #ff9f43); margin: 0 0 16px 0; font-size: 1.3em;">
