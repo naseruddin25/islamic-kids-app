@@ -19,7 +19,7 @@
     const host = document.getElementById('start-learning-intro');
     if (!host) return;
     host.innerHTML = `
-      <div class="card intro-card">
+      <div class=\"card intro-card\">
         <h2>Start Learning</h2>
         <p>
           Welcome to Teen Deen. You're about to start a journey exploring Islamic concepts that are relevant to your life right now. Whether you're curious about faith, identity, relationships, or purpose, these lessons are designed specifically for you.
@@ -87,14 +87,14 @@
     const ctaLabel = state.currentMode === 'quiz' ? 'Start Quiz' : (isCompleted ? 'Review' : 'Start');
     
     return `
-      <a href="${lessonUrl}" class="card">
-        <div class="card-header">
-          <span class="card-badge">${badge}</span>
-          ${isCompleted ? '<span style="font-size: 18px;">✓</span>' : ''}
+      <a href=\"${lessonUrl}\" class=\"card\">
+        <div class=\"card-header\">
+          <span class=\"card-badge\">${badge}</span>
+          ${isCompleted ? '<span style=\"font-size: 18px;\">✓</span>' : ''}
         </div>
         <h3>${lesson.title}</h3>
-        <p class="card-description">${lesson.tags.join(' • ')}</p>
-        <div class="card-meta">
+        <p class=\"card-description\">${lesson.tags.join(' • ')}</p>
+        <div class=\"card-meta\">
           <span>⏱ ${lesson.minutes} min</span>
           <span>${ctaLabel}</span>
         </div>
@@ -111,13 +111,13 @@
 
     if (filteredLessons.length === 0) {
       grid.innerHTML = `
-        <div class="no-lessons">
-          <p class="no-lessons-title">No lessons found</p>
-          <p class="no-lessons-text">Try adjusting your search or category filters.</p>
+        <div class=\"no-lessons\">
+          <p class=\"no-lessons-title\">No lessons found</p>
+          <p class=\"no-lessons-text\">Try adjusting your search or category filters.</p>
         </div>
       `;
       if (statusEl) {
-        statusEl.textContent = state.currentSearch ? `No results for "${state.currentSearch}"` : '';
+        statusEl.textContent = state.currentSearch ? `No results for \"${state.currentSearch}\"` : '';
       }
     } else {
       grid.innerHTML = filteredLessons.map(renderLessonCard).join('');
@@ -270,16 +270,17 @@
         const offline = !navigator.onLine;
         const basePath = window.BASE_PATH || '(not set)';
         grid.innerHTML = `
-          <div class="no-lessons">
-            <p class="no-lessons-title">${offline ? 'Offline' : 'Error loading lessons'}</p>
-            <p class="no-lessons-text">${offline ? 
+          <div class=\"no-lessons\">
+            <p class=\"no-lessons-title\">${offline ? 'Offline' : 'Error loading lessons'}</p>
+            <p class=\"no-lessons-text\">${offline ? 
               'You\'re offline. Reconnect to load lessons.' : 
               'Unable to load lessons. Please check your connection and try again.'
             }</p>
+            <button class=\"btn-inline\" id=\"retry-lessons\" style=\"margin-top: 12px;\">Retry</button>
             ${!offline ? `
-              <details style="margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 4px;">
-                <summary style="cursor: pointer; font-weight: 600;">Technical Details</summary>
-                <pre style="margin-top: 8px; font-size: 0.85em; white-space: pre-wrap; color: #666;">
+              <details style=\"margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 4px;\">
+                <summary style=\"cursor: pointer; font-weight: 600;\">Technical Details</summary>
+                <pre style=\"margin-top: 8px; font-size: 0.85em; white-space: pre-wrap; color: #666;\">
 Error: ${err.message}
 
 Base Path: ${basePath}
@@ -291,6 +292,8 @@ Suggestion: Add ?debug=1 to the URL to see diagnostic info.
             ` : ''}
           </div>
         `;
+        const retryBtn = document.getElementById('retry-lessons');
+        if (retryBtn) retryBtn.addEventListener('click', () => location.reload());
       }
     }
   }
