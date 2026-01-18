@@ -197,18 +197,28 @@
 
   async function loadLessons() {
     const manifestUrl = window.withBase ? window.withBase('data/lessons.json') : 'data/lessons.json';
+    console.log('[loadLessons] Fetching from:', manifestUrl);
+    
     try {
-      console.log('[loadLessons] Fetching from:', manifestUrl);
       const res = await fetch(manifestUrl, { cache: 'no-store' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText} - Failed to load ${manifestUrl}`);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText} - Failed to load ${manifestUrl}`);
+      }
+      
       const data = await res.json();
-      console.log('[loadLessons] Successfully loaded', (data.lessons || []).length, 'lessons');
+      const lessonCount = (data.lessons || []).length;
+      console.log('[loadLessons] Successfully loaded', lessonCount, 'lessons');
+      
+      if (window.updateDebugInfo) {
+        window.updateDebugInfo({ lessonsCount: lessonCount });
+      }
+      
       return data.lessons || [];
     } catch (error) {
       console.error('[loadLessons] Error:', error);
       if (window.updateDebugInfo) {
         window.updateDebugInfo({ 
-          lastError: `${error.message}\n\nAttempted URL: ${manifestUrl}\nBase path: ${window.BASE_PATH || '(none)'}` 
+          lastError: `${error.message}\n\nAttempted URL: ${manifestUrl}\nBase path: ${window.BASE_PATH || '(not set)'}` 
         });
       }
       throw error;
@@ -226,6 +236,47 @@
     } catch (err) {
       console.warn('[QuizIndex] Could not load quiz index:', err.message);
       state.lessonsWithQuiz = new Set();
+    }
+  }
+
+  function showErrorWithRetry(err) {
+    const grid = document.getElementById('lessons-grid');
+    if (!grid) return;
+
+    const offline = !navigator.onLine;
+    const basePath = window.BASE_PATH || '(not set)';
+    
+    grid.innerHTML = `
+      <div class=\"no-lessons\">
+        <p class=\"no-lessons-title\">⚠️ ${offline ? 'Offline' : 'Error Loading Lessons'}</p>
+        <p class=\"no-lessons-text\">
+          ${offline 
+            ? 'You\'re offline. Please reconnect to your internet and try again.' 
+            : 'Unable to load lessons. Please check your connection and try again.'}
+        </p>
+        <button class=\"btn-inline\" id=\"retry-lessons\" style=\"margin-top: 16px; display: inline-block;\">🔄 Retry</button>
+        ${!offline ? `
+          <details style=\"margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 8px; text-align: left;\">
+            <summary style=\"cursor: pointer; font-weight: 600; color: #666;\">Technical Details</summary>
+            <pre style=\"margin-top: 8px; font-size: 0.8em; white-space: pre-wrap; overflow-x: auto; color: #666; background: white; padding: 8px; border-radius: 4px;\">Error: ${err.message}
+
+Base Path: ${basePath}
+Location: ${window.location.pathname}
+Online: ${navigator.onLine}
+
+Tip: Add ?debug=1 to the URL for diagnostic info.
+            </pre>
+          </details>
+        ` : ''}
+      </div>
+    `;
+    
+    const retryBtn = document.getElementById('retry-lessons');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => {
+        console.log('[Retry] Reloading...');
+        location.reload();
+      });
     }
   }
 
@@ -262,39 +313,11 @@
       setupCTA();
 
       updateDisplay();
+      console.log('[Init] Successfully initialized lessons page');
       
     } catch (err) {
       console.error('[Init Error]', err);
-      const grid = document.getElementById('lessons-grid');
-      if (grid) {
-        const offline = !navigator.onLine;
-        const basePath = window.BASE_PATH || '(not set)';
-        grid.innerHTML = `
-          <div class=\"no-lessons\">
-            <p class=\"no-lessons-title\">${offline ? 'Offline' : 'Error loading lessons'}</p>
-            <p class=\"no-lessons-text\">${offline ? 
-              'You\'re offline. Reconnect to load lessons.' : 
-              'Unable to load lessons. Please check your connection and try again.'
-            }</p>
-            <button class=\"btn-inline\" id=\"retry-lessons\" style=\"margin-top: 12px;\">Retry</button>
-            ${!offline ? `
-              <details style=\"margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 4px;\">
-                <summary style=\"cursor: pointer; font-weight: 600;\">Technical Details</summary>
-                <pre style=\"margin-top: 8px; font-size: 0.85em; white-space: pre-wrap; color: #666;\">
-Error: ${err.message}
-
-Base Path: ${basePath}
-Current Location: ${window.location.pathname}
-
-Suggestion: Add ?debug=1 to the URL to see diagnostic info.
-                </pre>
-              </details>
-            ` : ''}
-          </div>
-        `;
-        const retryBtn = document.getElementById('retry-lessons');
-        if (retryBtn) retryBtn.addEventListener('click', () => location.reload());
-      }
+      showErrorWithRetry(err);
     }
   }
 
