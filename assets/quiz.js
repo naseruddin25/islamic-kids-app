@@ -65,7 +65,7 @@
           retryBtn.classList.toggle('hidden', correct); 
           retryBtn.style.display = correct ? 'none' : 'inline-block'; 
         }
-        saveScore(lesson.id, correct ? 1 : 0, 1);
+        saveScore(lesson.id, correct ? 1 : 0, 1, lesson);
       };
     }
 
@@ -80,6 +80,19 @@
         retryBtn.classList.add('hidden');
         retryBtn.style.display = 'none';
       };
+    }
+  }
+
+  function scrollToFirstIncorrect(incorrectQIds) {
+    if (incorrectQIds.length === 0) return;
+    const firstId = incorrectQIds[0];
+    const elem = document.querySelector(`.quiz-question-block[data-question-id="${firstId}"]`);
+    if (elem) {
+      elem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      elem.style.boxShadow = '0 0 0 3px rgba(239, 71, 111, 0.3)';
+      setTimeout(() => {
+        elem.style.boxShadow = '';
+      }, 2000);
     }
   }
 
@@ -104,11 +117,13 @@
       <div id="quiz-results" class="hidden" style="display: none; margin-bottom: 24px;"></div>
       <div id="quiz-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
         <button id="quiz-submit-btn" class="quiz-btn quiz-btn-primary">Submit Quiz</button>
+        <button id="quiz-review-btn" class="quiz-btn quiz-btn-secondary hidden" style="display: none;">Review Answers</button>
         <button id="quiz-retry-btn" class="quiz-btn quiz-btn-secondary hidden" style="display: none;">Try Again</button>
       </div>
     `;
 
     const submitDataBtn = document.getElementById('quiz-submit-btn');
+    const reviewDataBtn = document.getElementById('quiz-review-btn');
     const retryDataBtn = document.getElementById('quiz-retry-btn');
 
     submitDataBtn.addEventListener('click', () => {
@@ -130,9 +145,14 @@
       }
 
       let score = 0;
+      const incorrectQIds = [];
       quizData.questions.forEach(q => {
         const isCorrect = answers[q.id] === q.correctIndex;
-        if (isCorrect) score++;
+        if (isCorrect) {
+          score++;
+        } else {
+          incorrectQIds.push(q.id);
+        }
         const block = document.querySelector(`.quiz-question-block[data-question-id="${q.id}"]`);
         const feedback = block.querySelector('.quiz-feedback');
         feedback.classList.remove('hidden');
@@ -149,7 +169,7 @@
         pass ? 'success' : 'retry'
       );
 
-      saveScore(lesson.id, score, quizData.questions.length);
+      saveScore(lesson.id, score, quizData.questions.length, lesson);
 
       if (pass && window.TeenDeenConfetti) {
         setTimeout(() => window.TeenDeenConfetti.celebrate(), 300);
@@ -157,7 +177,20 @@
 
       // Toggle action buttons
       submitDataBtn.style.display = 'none';
+      if (incorrectQIds.length > 0) {
+        reviewDataBtn.style.display = 'inline-flex';
+        reviewDataBtn.onclick = () => scrollToFirstIncorrect(incorrectQIds);
+      }
       retryDataBtn.style.display = 'inline-flex';
+    });
+
+    reviewDataBtn.addEventListener('click', () => {
+      // Review button already has click handler, but ensure focus
+      scrollToFirstIncorrect(
+        Array.from(document.querySelectorAll('.quiz-feedback'))
+          .filter(fb => fb.style.color === '#d0354a')
+          .map(fb => fb.closest('.quiz-question-block').dataset.questionId)
+      );
     });
 
     retryDataBtn.addEventListener('click', () => {
@@ -167,6 +200,7 @@
       document.querySelectorAll('.quiz-feedback').forEach(fb => { fb.classList.add('hidden'); fb.style.display = 'none'; });
       const resultsDiv = document.getElementById('quiz-results');
       resultsDiv.style.display = 'none';
+      reviewDataBtn.style.display = 'none';
       submitDataBtn.style.display = 'inline-flex';
       retryDataBtn.style.display = 'none';
     });
@@ -196,7 +230,7 @@
     }
   }
 
-  function saveScore(lessonId, score, total) {
+  function saveScore(lessonId, score, total, lesson) {
     try {
       const completed = new Set(JSON.parse(localStorage.getItem('completedLessons')||'[]'));
       completed.add(lessonId);
@@ -218,7 +252,7 @@
         if (passed) {
           window.TeenDeenCertificate.renderCertificatePanel({
             lessonId,
-            lessonTitle: '',
+            lessonTitle: lesson.title || '',
             score,
             total,
             passed: true
