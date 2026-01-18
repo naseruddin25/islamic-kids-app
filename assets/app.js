@@ -18,9 +18,13 @@
     currentLesson: null
   };
 
-  // Lesson audio mapping
+  // Lesson audio mapping - supports male/female narrators
   const lessonAudio = {
-    'lesson-01': 'lesson-01-intentions.mp3'
+    'lesson-01': {
+      male: 'lesson-01-intentions-male.mp3',
+      female: 'lesson-01-intentions-female.mp3'
+    }
+    // Add more lessons here as needed
   };
 
   const readLastLesson = () => {
@@ -83,37 +87,143 @@
   }
 
   function renderAudioPlayer(lessonId) {
-    const container = document.getElementById('audio-player-container');
-    if (!container) return;
-
-    const audioFile = lessonAudio[lessonId];
-    if (!audioFile) {
-      container.innerHTML = '';
+    const audioConfig = lessonAudio[lessonId];
+    const audioContainer = document.getElementById('audio-player-container');
+    
+    if (!audioContainer || !audioConfig) {
+      console.log('[Audio] No audio configured for lesson:', lessonId);
       return;
     }
 
-    // Build audio src with proper base path handling
-    let audioSrc;
-    if (window.withBase && typeof window.withBase === 'function') {
-      audioSrc = window.withBase(`audio/${audioFile}`);
-    } else {
-      const base = window.BASE_PATH || '/islamic-kids-app';
-      audioSrc = `${base}/audio/${audioFile}`;
-    }
+    // Resolve base path for GitHub Pages
+    const getBasePath = () => {
+      if (window.location.pathname.includes('/islamic-kids-app/')) {
+        return '/islamic-kids-app';
+      }
+      return '';
+    };
 
-    console.log('[Audio] Loading audio from:', audioSrc);
+    const basePath = getBasePath();
 
-    container.innerHTML = `
-      <div style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start;">
-        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 1.025em; color: var(--color-text);">
-          🎧 Listen to Lesson
-        </label>
-        <audio controls preload="none" style="width: 100%; max-width: 100%; height: 40px; border-radius: var(--radius-md); font-family: inherit;">
-          <source src="${audioSrc}" type="audio/mpeg">
-          Your browser does not support the audio element.
-        </audio>
+    audioContainer.innerHTML = `
+      <div class="audio-player-wrapper">
+        <div>
+          <label for="narrator-select">🎤 Narrator:</label>
+          <select id="narrator-select">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="display: block; font-weight: 600; font-size: 0.95em; color: var(--color-text); white-space: nowrap;">🎧 Listen:</label>
+          <audio id="lesson-audio" controls preload="none">
+            <source id="audio-source" src="" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+        
+        <div id="audio-error" class="audio-error"></div>
       </div>
     `;
+
+    const audioElement = document.getElementById('lesson-audio');
+    const sourceElement = document.getElementById('audio-source');
+    const narratorSelect = document.getElementById('narrator-select');
+    const errorDiv = document.getElementById('audio-error');
+
+    // Set initial audio source
+    const setAudioSource = (narrator) => {
+      if (audioConfig[narrator]) {
+        const audioUrl = `${basePath}/audio/${audioConfig[narrator]}`;
+        sourceElement.src = audioUrl;
+        console.log('[Audio] Set narrator to:', narrator, '| resolved src:', audioUrl);
+        audioElement.load();
+        errorDiv.classList.remove('visible');
+        errorDiv.textContent = '';
+      }
+    };
+
+    // Initial setup with male narrator
+    setAudioSource('male');
+
+    // Narrator dropdown change handler
+    narratorSelect.addEventListener('change', (e) => {
+      const wasPlaying = !audioElement.paused;
+      const currentTime = audioElement.currentTime;
+      
+      setAudioSource(e.target.value);
+      audioElement.currentTime = currentTime;
+      
+      if (wasPlaying) {
+        audioElement.play().catch(err => {
+          console.warn('[Audio] Auto-play after narrator change failed:', err);
+        });
+      }
+    });
+
+    // Audio event listeners for debugging and error handling
+    audioElement.addEventListener('loadedmetadata', () => {
+      console.log('[Audio] Loaded metadata | duration:', audioElement.duration);
+      errorDiv.classList.remove('visible');
+    });
+
+    audioElement.addEventListener('canplay', () => {
+      console.log('[Audio] Can play');
+    });
+
+    audioElement.addEventListener('play', () => {
+      console.log('[Audio] Playing');
+    });
+
+    audioElement.addEventListener('pause', () => {
+      console.log('[Audio] Paused');
+    });
+
+    audioElement.addEventListener('error', (e) => {
+      console.error('[Audio] Error event:', audioElement.error);
+      const audioUrl = sourceElement.src;
+      let errorMsg = 'Audio failed to load. ';
+      
+      if (audioElement.error) {
+        switch (audioElement.error.code) {
+          case audioElement.error.MEDIA_ERR_ABORTED:
+            errorMsg += 'Playback was aborted.';
+            break;
+          case audioElement.error.MEDIA_ERR_NETWORK:
+            errorMsg += 'Network error. Check file: ' + audioUrl;
+            break;
+          case audioElement.error.MEDIA_ERR_DECODE:
+            errorMsg += 'Audio file could not be decoded.';
+            break;
+          case audioElement.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMsg += 'Audio format not supported or file not found: ' + audioUrl;
+            break;
+          default:
+            errorMsg += 'Unknown error.';
+        }
+      }
+      
+      errorDiv.textContent = errorMsg;
+      errorDiv.classList.add('visible');
+    });
+
+    // Optional: Do a HEAD fetch to verify file exists
+    (async () => {
+      try {
+        const audioUrl = sourceElement.src;
+        const response = await fetch(audioUrl, { method: 'HEAD', cache: 'no-store' });
+        if (!response.ok) {
+          console.warn('[Audio] HEAD request failed:', response.status, audioUrl);
+          errorDiv.textContent = `Audio file not found (${response.status}): ${audioUrl}`;
+          errorDiv.classList.add('visible');
+        } else {
+          console.log('[Audio] File verified with HEAD request:', audioUrl);
+        }
+      } catch (err) {
+        console.warn('[Audio] HEAD fetch error:', err);
+      }
+    })();
   }
 
   function renderLesson(){
@@ -159,6 +269,13 @@
       window.updateDebugInfo({ lessonId: id, contentUrl });
     }
     
+    // Hide old TTS UI on lesson pages (we're using new MP3 audio player instead)
+    const ttsContainer = document.getElementById('tts-container');
+    if (ttsContainer) {
+      ttsContainer.style.display = 'none';
+      console.log('[renderLesson] Hiding old TTS UI; using new audio player instead');
+    }
+
     // Load lesson content
     (async () => {
       try {
@@ -166,16 +283,6 @@
         if (res.ok) {
           const html = await res.text();
           document.getElementById('lesson-body').innerHTML = html;
-          
-          // Initialize TTS after content loads
-          if (window.TeenDeenTTS) {
-            setTimeout(() => {
-              const initialized = window.TeenDeenTTS.initialize('.lesson-content');
-              if (initialized && document.getElementById('tts-container')) {
-                window.TeenDeenTTS.renderControls('#tts-container');
-              }
-            }, 500);
-          }
         } else {
           console.warn('[Content] Could not load:', contentUrl, res.status);
           document.getElementById('lesson-body').textContent = `This is a brief, friendly overview to introduce: ${lesson.title}.`;
