@@ -1,8 +1,10 @@
-// ==========================================
-// MAIN.JS - Filtering & Interaction Logic
-// ==========================================
+/**
+ * MAIN.JS - Filtering & Interaction Logic with GitHub Pages support
+ */
 
 (function() {
+  'use strict';
+
   const state = {
     allLessons: [],
     currentSearch: '',
@@ -48,8 +50,13 @@
     const isCompleted = state.completedLessons.has(lesson.id);
     const badge = `Lesson ${String(lesson.number).padStart(2, '0')}`;
     
+    // Use withBase() for lesson links
+    const lessonUrl = window.withBase ? 
+      window.withBase(`lessons/lesson.html?id=${encodeURIComponent(lesson.id)}`) :
+      `lessons/lesson.html?id=${encodeURIComponent(lesson.id)}`;
+    
     return `
-      <a href="lessons/lesson.html?id=${encodeURIComponent(lesson.id)}" class="card">
+      <a href="${lessonUrl}" class="card">
         <div class="card-header">
           <span class="card-badge">${badge}</span>
           ${isCompleted ? '<span style="font-size: 18px;">✓</span>' : ''}
@@ -69,6 +76,8 @@
     const grid = document.getElementById('lessons-grid');
     const statusEl = document.getElementById('filter-status');
 
+    if (!grid) return;
+
     if (filteredLessons.length === 0) {
       grid.innerHTML = `
         <div class="no-lessons">
@@ -76,11 +85,20 @@
           <p class="no-lessons-text">Try adjusting your search or category filters.</p>
         </div>
       `;
-      statusEl.textContent = state.currentSearch ? `No results for "${state.currentSearch}"` : '';
+      if (statusEl) {
+        statusEl.textContent = state.currentSearch ? `No results for "${state.currentSearch}"` : '';
+      }
     } else {
       grid.innerHTML = filteredLessons.map(renderLessonCard).join('');
-      const count = filteredLessons.length;
-      statusEl.textContent = state.currentSearch ? `Showing ${count} result(s)` : '';
+      if (statusEl) {
+        const count = filteredLessons.length;
+        statusEl.textContent = state.currentSearch ? `Showing ${count} result(s)` : '';
+      }
+    }
+
+    // Update debug info
+    if (window.updateDebugInfo) {
+      window.updateDebugInfo({ lessonsCount: state.allLessons.length });
     }
   }
 
@@ -98,7 +116,10 @@
       if (e.key === 'Enter') {
         const filtered = filterLessons(state.currentSearch, state.currentCategory);
         if (filtered.length === 1) {
-          window.location.href = `lessons/lesson.html?id=${encodeURIComponent(filtered[0].id)}`;
+          const url = window.withBase ?
+            window.withBase(`lessons/lesson.html?id=${encodeURIComponent(filtered[0].id)}`) :
+            `lessons/lesson.html?id=${encodeURIComponent(filtered[0].id)}`;
+          window.location.href = url;
         }
       }
     });
@@ -123,7 +144,8 @@
     const startBtn = document.getElementById('start-btn');
     if (startBtn) {
       startBtn.addEventListener('click', () => {
-        window.location.href = 'lessons/';
+        const url = window.withBase ? window.withBase('lessons/') : 'lessons/';
+        window.location.href = url;
       });
     }
   }
@@ -145,31 +167,43 @@
   }
 
   async function loadLessons() {
-    const paths = ['./assets/lessons.json', 'assets/lessons.json', '../assets/lessons.json'];
-    let lastError = null;
-
-    for (const path of paths) {
-      try {
-        const res = await fetch(path);
-        if (res.ok) {
-          const data = await res.json();
-          console.log(`[loadLessons] Loaded from ${path}`);
-          return data.lessons || [];
-        }
-        lastError = `${path}: HTTP ${res.status}`;
-      } catch (e) {
-        lastError = `${path}: ${e.message}`;
+    // Use withBase() to get correct path for GitHub Pages
+    const manifestUrl = window.withBase ? window.withBase('assets/lessons.json') : 'assets/lessons.json';
+    
+    try {
+      console.log('[loadLessons] Fetching from:', manifestUrl);
+      const res = await fetch(manifestUrl);
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText} - Failed to load ${manifestUrl}`);
       }
+      
+      const data = await res.json();
+      console.log('[loadLessons] Successfully loaded', (data.lessons || []).length, 'lessons');
+      return data.lessons || [];
+      
+    } catch (error) {
+      console.error('[loadLessons] Error:', error);
+      
+      // Update debug info
+      if (window.updateDebugInfo) {
+        window.updateDebugInfo({ 
+          lastError: `${error.message}\n\nAttempted URL: ${manifestUrl}\nBase path: ${window.BASE_PATH || '(none)'}` 
+        });
+      }
+      
+      throw error;
     }
-
-    throw new Error(`Failed to load lessons. Last error: ${lastError}`);
   }
 
   async function init() {
     try {
       // Register service worker
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
+        const swUrl = window.withBase ? window.withBase('sw.js') : 'sw.js';
+        navigator.serviceWorker.register(swUrl).catch((err) => {
+          console.warn('[SW] Registration failed:', err);
+        });
       }
 
       // Load data
@@ -184,14 +218,34 @@
 
       // Initial render
       updateDisplay();
+      
     } catch (err) {
       console.error('[Init Error]', err);
       const grid = document.getElementById('lessons-grid');
       if (grid) {
+        const offline = !navigator.onLine;
+        const basePath = window.BASE_PATH || '(not set)';
+        
         grid.innerHTML = `
           <div class="no-lessons">
-            <p class="no-lessons-title">Error loading lessons</p>
-            <p class="no-lessons-text">Please refresh the page or check your connection.</p>
+            <p class="no-lessons-title">${offline ? 'Offline' : 'Error loading lessons'}</p>
+            <p class="no-lessons-text">${offline ? 
+              'You\'re offline. Reconnect to load lessons.' : 
+              'Unable to load lessons. Please check your connection and try again.'
+            }</p>
+            ${!offline ? `
+              <details style="margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 4px;">
+                <summary style="cursor: pointer; font-weight: 600;">Technical Details</summary>
+                <pre style="margin-top: 8px; font-size: 0.85em; white-space: pre-wrap; color: #666;">
+Error: ${err.message}
+
+Base Path: ${basePath}
+Current Location: ${window.location.pathname}
+
+Suggestion: Add ?debug=1 to the URL to see diagnostic info.
+                </pre>
+              </details>
+            ` : ''}
           </div>
         `;
       }
