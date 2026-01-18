@@ -1,24 +1,12 @@
 /**
  * LESSON 01 INTERACTIVE - Quiz, Reflect, and Sharing
- * This script handles all interactivity for Lesson 1 (Intentions/Niyyah)
- * - Quiz with 5 MCQs
- * - Reflect section with localStorage persistence
- * - Results sharing (Copy/Email/Share)
- * 
- * ONLY ACTIVATES FOR LESSON-01, DOES NOT INTERFERE WITH OTHER LESSONS
+ * Simplified version with aggressive initialization
  */
 
 (function() {
   'use strict';
 
-  console.log('[Lesson 01 Interactive] Script loaded');
-
-  // Prevent duplicate initialization
-  if (window.__teenDeenLesson01Init) {
-    console.log('[Lesson 01 Interactive] Already initialized, skipping');
-    return;
-  }
-  window.__teenDeenLesson01Init = true;
+  console.log('[Lesson 01 Interactive] Script executing immediately');
 
   // Quiz configuration
   const QUIZ_CONFIG = {
@@ -89,7 +77,6 @@
     ]
   };
 
-  // State
   let quizState = {
     submitted: false,
     score: null,
@@ -97,128 +84,106 @@
     passed: false
   };
 
-  // Check if this is lesson-01
-  function checkLessonId() {
+  // Start checking immediately and continuously
+  let attempts = 0;
+  const checkInterval = setInterval(() => {
+    attempts++;
+    console.log('[Lesson 01 Interactive] Checking... attempt', attempts);
+    
+    // Check if this is lesson-01
     const params = new URLSearchParams(window.location.search);
     const lessonId = params.get('id');
-    console.log('[Lesson 01 Interactive] Detected lesson ID:', lessonId);
-    return lessonId === 'lesson-01';
-  }
-
-  // Initialize when conditions are met
-  function tryInitialize() {
-    console.log('[Lesson 01 Interactive] Attempting to initialize...');
     
-    if (!checkLessonId()) {
-      console.log('[Lesson 01 Interactive] Not lesson-01, exiting');
+    if (lessonId !== 'lesson-01') {
+      console.log('[Lesson 01 Interactive] Not lesson-01 (detected:', lessonId, '), will keep checking...');
+      if (attempts > 20) {
+        clearInterval(checkInterval);
+        console.log('[Lesson 01 Interactive] Gave up - not lesson-01');
+      }
       return;
     }
-
-    console.log('[Lesson 01 Interactive] This is lesson-01, looking for quiz-options element...');
+    
+    console.log('[Lesson 01 Interactive] This IS lesson-01! Looking for quiz-options...');
     
     // Look for quiz-options element
-    let attempts = 0;
-    const maxAttempts = 100; // 5 seconds
+    const quizOptions = document.getElementById('quiz-options');
     
-    const checkQuizOptions = setInterval(() => {
-      attempts++;
-      const quizOptions = document.getElementById('quiz-options');
-      
-      if (quizOptions) {
-        clearInterval(checkQuizOptions);
-        console.log('[Lesson 01 Interactive] Found quiz-options element, rendering quiz');
-        
-        // Make sure parent section is visible
-        const quizSection = document.getElementById('quiz-section');
-        if (quizSection) {
-          quizSection.style.display = 'block';
-        }
-        
-        renderQuiz();
-        initReflectSection();
-        loadSavedData();
-      } else if (attempts >= maxAttempts) {
-        clearInterval(checkQuizOptions);
-        console.error('[Lesson 01 Interactive] Timeout: quiz-options element not found after', attempts, 'attempts');
+    if (!quizOptions) {
+      console.log('[Lesson 01 Interactive] quiz-options not found yet...');
+      if (attempts > 200) {
+        clearInterval(checkInterval);
+        console.error('[Lesson 01 Interactive] TIMEOUT - quiz-options never appeared');
       }
-    }, 50);
-  }
+      return;
+    }
+    
+    // Found it!
+    clearInterval(checkInterval);
+    console.log('[Lesson 01 Interactive] SUCCESS! Found quiz-options, rendering now...');
+    
+    renderQuiz();
+    initReflectSection();
+    loadSavedData();
+    
+  }, 50);
 
-  // Render quiz UI - replaces the content of quiz-options element
   function renderQuiz() {
     const quizOptions = document.getElementById('quiz-options');
     if (!quizOptions) {
-      console.error('[Lesson 01 Interactive] quiz-options element not found');
+      console.error('[renderQuiz] quiz-options disappeared!');
       return;
     }
 
+    console.log('[renderQuiz] Building quiz HTML...');
+
     const quizHTML = `
-      <!-- Quiz Questions -->
       <div id="quiz-questions" style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 24px;">
         ${QUIZ_CONFIG.questions.map((q, index) => renderQuestion(q, index)).join('')}
       </div>
-
-      <!-- Results Area -->
       <div id="quiz-results" class="hidden" style="display: none; margin-bottom: 24px;"></div>
-
-      <!-- Quiz Actions -->
       <div id="quiz-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <button id="quiz-submit-btn" class="quiz-btn quiz-btn-primary">
-          Submit Quiz
-        </button>
-        <button id="quiz-retry-btn" class="quiz-btn quiz-btn-secondary hidden" style="display: none;">
-          Try Again
-        </button>
+        <button id="quiz-submit-btn" class="quiz-btn quiz-btn-primary">Submit Quiz</button>
+        <button id="quiz-retry-btn" class="quiz-btn quiz-btn-secondary hidden" style="display: none;">Try Again</button>
       </div>
-
-      <!-- Sharing Area (shown after submit) -->
       <div id="quiz-sharing" class="hidden" style="display: none; margin-top: 24px; padding: 20px; background: var(--color-bg-warm, #fff7ec); border-radius: var(--radius-md, 12px); border: 2px solid var(--color-primary, #ff9f43);">
-        <h4 style="margin: 0 0 16px 0; font-size: 1.1em; color: var(--color-text, #2f1b0f);">
-          📤 Share Your Results
-        </h4>
+        <h4 style="margin: 0 0 16px 0; font-size: 1.1em; color: var(--color-text, #2f1b0f);">📤 Share Your Results</h4>
         <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
           <label style="display: block;">
-            <span style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.9em; color: var(--color-text-muted, #6c5a4d);">
-              Your Name (optional for sharing)
-            </span>
-            <input 
-              type="text" 
-              id="student-name-input" 
-              placeholder="Enter your name"
-              style="width: 100%; padding: 12px; border: 2px solid var(--color-border, rgba(0,0,0,0.08)); border-radius: var(--radius-sm, 8px); font-family: inherit; font-size: 1em;"
-            />
+            <span style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.9em; color: var(--color-text-muted, #6c5a4d);">Your Name (optional for sharing)</span>
+            <input type="text" id="student-name-input" placeholder="Enter your name" style="width: 100%; padding: 12px; border: 2px solid var(--color-border, rgba(0,0,0,0.08)); border-radius: var(--radius-sm, 8px); font-family: inherit; font-size: 1em;" />
           </label>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button id="share-copy-btn" class="quiz-btn quiz-btn-secondary">
-            📋 Copy Results
-          </button>
-          <button id="share-email-btn" class="quiz-btn quiz-btn-secondary">
-            ✉️ Email Results
-          </button>
-          <button id="share-web-btn" class="quiz-btn quiz-btn-secondary hidden" style="display: none;">
-            🔗 Share
-          </button>
+          <button id="share-copy-btn" class="quiz-btn quiz-btn-secondary">📋 Copy Results</button>
+          <button id="share-email-btn" class="quiz-btn quiz-btn-secondary">✉️ Email Results</button>
+          <button id="share-web-btn" class="quiz-btn quiz-btn-secondary hidden" style="display: none;">🔗 Share</button>
         </div>
         <div id="share-status" style="margin-top: 12px; font-size: 0.9em; color: var(--color-text-muted, #6c5a4d);"></div>
       </div>
     `;
 
-    // Replace quiz-options content
     quizOptions.innerHTML = quizHTML;
-    console.log('[Lesson 01 Interactive] Quiz HTML injected into quiz-options');
+    console.log('[renderQuiz] Quiz HTML inserted!');
 
-    // Hide default quiz buttons
+    // Hide default buttons
     const defaultSubmit = document.getElementById('quiz-submit');
     const defaultRetry = document.getElementById('quiz-retry');
-    if (defaultSubmit) defaultSubmit.style.display = 'none';
-    if (defaultRetry) defaultRetry.style.display = 'none';
+    if (defaultSubmit) {
+      defaultSubmit.style.display = 'none';
+      console.log('[renderQuiz] Hid default submit button');
+    }
+    if (defaultRetry) {
+      defaultRetry.style.display = 'none';
+      console.log('[renderQuiz] Hid default retry button');
+    }
 
     // Add event listeners
+    console.log('[renderQuiz] Adding event listeners...');
     document.getElementById('quiz-submit-btn').addEventListener('click', handleSubmit);
     document.getElementById('quiz-retry-btn').addEventListener('click', handleRetry);
     document.getElementById('share-copy-btn').addEventListener('click', handleCopyResults);
     document.getElementById('share-email-btn').addEventListener('click', handleEmailResults);
+    
     const shareWebBtn = document.getElementById('share-web-btn');
     if (navigator.share) {
       shareWebBtn.style.display = 'inline-flex';
@@ -226,31 +191,22 @@
       shareWebBtn.addEventListener('click', handleWebShare);
     }
 
-    // Add input listener for student name persistence
     document.getElementById('student-name-input').addEventListener('input', debounce((e) => {
       saveToLocalStorage('teenDeen.studentName', e.target.value.trim());
     }, 500));
+
+    console.log('[renderQuiz] All done! Quiz should be visible now.');
   }
 
-  // Render individual question
   function renderQuestion(q, index) {
     return `
       <div class="quiz-question-block" data-question-id="${q.id}" style="padding: 20px; background: var(--color-surface, #fff); border: 2px solid var(--color-border, rgba(0,0,0,0.08)); border-radius: var(--radius-md, 12px);">
-        <p style="margin: 0 0 16px 0; font-weight: 700; font-size: 1.05em; color: var(--color-text, #2f1b0f);">
-          ${q.question}
-        </p>
+        <p style="margin: 0 0 16px 0; font-weight: 700; font-size: 1.05em; color: var(--color-text, #2f1b0f);">${q.question}</p>
         <div class="quiz-choices" style="display: flex; flex-direction: column; gap: 8px;">
           ${q.choices.map(choice => `
             <label class="quiz-choice-label" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 2px solid var(--color-border, rgba(0,0,0,0.08)); border-radius: var(--radius-sm, 8px); cursor: pointer; transition: all 150ms ease; min-height: 44px; user-select: none;">
-              <input 
-                type="radio" 
-                name="${q.id}" 
-                value="${choice.value}" 
-                style="width: 20px; height: 20px; cursor: pointer; margin: 0; flex-shrink: 0;"
-              />
-              <span style="font-size: 1em; line-height: 1.5;">
-                ${choice.value}) ${choice.text}
-              </span>
+              <input type="radio" name="${q.id}" value="${choice.value}" style="width: 20px; height: 20px; cursor: pointer; margin: 0; flex-shrink: 0;" />
+              <span style="font-size: 1em; line-height: 1.5;">${choice.value}) ${choice.text}</span>
             </label>
           `).join('')}
         </div>
@@ -259,11 +215,7 @@
     `;
   }
 
-  // Handle quiz submission
   function handleSubmit() {
-    console.log('[Quiz] Submit clicked');
-
-    // Validate all questions answered
     const answers = {};
     let allAnswered = true;
 
@@ -281,21 +233,18 @@
       return;
     }
 
-    // Calculate score
     let score = 0;
     QUIZ_CONFIG.questions.forEach(q => {
-      if (answers[q.id] === q.correct) {
-        score++;
-      }
+      if (answers[q.id] === q.correct) score++;
     });
 
-    // Update state
-    quizState.submitted = true;
-    quizState.score = score;
-    quizState.answers = answers;
-    quizState.passed = score >= QUIZ_CONFIG.passThreshold;
+    quizState = {
+      submitted: true,
+      score: score,
+      answers: answers,
+      passed: score >= QUIZ_CONFIG.passThreshold
+    };
 
-    // Show feedback for each question
     QUIZ_CONFIG.questions.forEach(q => {
       const block = document.querySelector(`.quiz-question-block[data-question-id="${q.id}"]`);
       const feedback = block.querySelector('.quiz-feedback');
@@ -306,13 +255,9 @@
       feedback.style.background = isCorrect ? 'rgba(6, 214, 160, 0.1)' : 'rgba(239, 71, 111, 0.1)';
       feedback.style.borderLeft = isCorrect ? '4px solid #06d6a0' : '4px solid #ef476f';
       feedback.style.color = isCorrect ? '#00a37a' : '#d0354a';
-      feedback.innerHTML = `
-        <strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong><br>
-        ${q.explanation}
-      `;
+      feedback.innerHTML = `<strong>${isCorrect ? '✓ Correct' : '✗ Incorrect'}</strong><br>${q.explanation}`;
     });
 
-    // Show overall results
     const passText = quizState.passed ? 
       `<strong style="color: #06d6a0;">✓ PASSED</strong> — Great work!` : 
       `<strong style="color: #ef476f;">Not quite.</strong> Review the explanations and try again.`;
@@ -322,12 +267,10 @@
       quizState.passed ? 'success' : 'retry'
     );
 
-    // Save to localStorage
     saveToLocalStorage('teenDeen.lesson-01.score', score);
     saveToLocalStorage('teenDeen.lesson-01.passed', quizState.passed);
     saveToLocalStorage('teenDeen.lesson-01.completedAt', new Date().toISOString());
 
-    // Also save to legacy format for compatibility
     try {
       const completed = new Set(JSON.parse(localStorage.getItem('completedLessons') || '[]'));
       completed.add('lesson-01');
@@ -340,23 +283,14 @@
       console.warn('[Quiz] Legacy storage failed:', err);
     }
 
-    // Update UI
-    document.getElementById('quiz-submit-btn').classList.add('hidden');
     document.getElementById('quiz-submit-btn').style.display = 'none';
-    document.getElementById('quiz-retry-btn').classList.remove('hidden');
     document.getElementById('quiz-retry-btn').style.display = 'inline-flex';
-    
-    // Show sharing section
-    const sharingSection = document.getElementById('quiz-sharing');
-    sharingSection.classList.remove('hidden');
-    sharingSection.style.display = 'block';
+    document.getElementById('quiz-sharing').style.display = 'block';
 
-    // Trigger confetti celebration
     if (quizState.passed && window.TeenDeenConfetti) {
       setTimeout(() => window.TeenDeenConfetti.celebrate(), 300);
     }
 
-    // Update progress tracking
     if (window.TeenDeenProgress) {
       try {
         window.TeenDeenProgress.completeLesson(QUIZ_CONFIG.lessonId, score, QUIZ_CONFIG.questions.length);
@@ -365,7 +299,6 @@
       }
     }
 
-    // Trigger certificate if passed
     if (quizState.passed && window.TeenDeenCertificate) {
       try {
         window.TeenDeenCertificate.checkIfPassed(QUIZ_CONFIG.lessonId, score, QUIZ_CONFIG.questions.length);
@@ -377,205 +310,108 @@
           passed: true
         });
       } catch (err) {
-        console.warn('[Quiz] Certificate integration error:', err);
+        console.warn('[Quiz] Certificate error:', err);
       }
     }
   }
 
-  // Handle retry
   function handleRetry() {
-    console.log('[Quiz] Retry clicked');
-
-    // Clear all radio selections
     QUIZ_CONFIG.questions.forEach(q => {
-      const radios = document.querySelectorAll(`input[name="${q.id}"]`);
-      radios.forEach(radio => radio.checked = false);
+      document.querySelectorAll(`input[name="${q.id}"]`).forEach(radio => radio.checked = false);
     });
 
-    // Hide all feedback
     document.querySelectorAll('.quiz-feedback').forEach(fb => {
       fb.classList.add('hidden');
       fb.style.display = 'none';
-      fb.innerHTML = '';
     });
 
-    // Hide results
-    const resultsDiv = document.getElementById('quiz-results');
-    resultsDiv.classList.add('hidden');
-    resultsDiv.style.display = 'none';
-    resultsDiv.innerHTML = '';
-
-    // Hide sharing section
-    const sharingSection = document.getElementById('quiz-sharing');
-    sharingSection.classList.add('hidden');
-    sharingSection.style.display = 'none';
-
-    // Reset state
-    quizState = {
-      submitted: false,
-      score: null,
-      answers: {},
-      passed: false
-    };
-
-    // Update buttons
-    document.getElementById('quiz-submit-btn').classList.remove('hidden');
+    document.getElementById('quiz-results').style.display = 'none';
+    document.getElementById('quiz-sharing').style.display = 'none';
     document.getElementById('quiz-submit-btn').style.display = 'inline-flex';
-    document.getElementById('quiz-retry-btn').classList.add('hidden');
     document.getElementById('quiz-retry-btn').style.display = 'none';
+
+    quizState = { submitted: false, score: null, answers: {}, passed: false };
   }
 
-  // Show results message
   function showResults(message, type) {
     const resultsDiv = document.getElementById('quiz-results');
-    resultsDiv.classList.remove('hidden');
     resultsDiv.style.display = 'block';
-    resultsDiv.innerHTML = `
-      <div style="padding: 16px 20px; border-radius: var(--radius-md, 12px); ${getResultsStyle(type)}">
-        ${message}
-      </div>
-    `;
+    resultsDiv.innerHTML = `<div style="padding: 16px 20px; border-radius: var(--radius-md, 12px); ${getResultsStyle(type)}">${message}</div>`;
   }
 
-  // Get results styling
   function getResultsStyle(type) {
     switch(type) {
-      case 'success':
-        return 'background: rgba(6, 214, 160, 0.1); border: 2px solid #06d6a0; color: #00a37a;';
-      case 'warning':
-        return 'background: rgba(255, 209, 102, 0.1); border: 2px solid #ffd166; color: #b88900;';
-      case 'retry':
-        return 'background: rgba(239, 71, 111, 0.1); border: 2px solid #ef476f; color: #d0354a;';
-      default:
-        return 'background: var(--color-surface, #fff); border: 2px solid var(--color-border, rgba(0,0,0,0.08));';
+      case 'success': return 'background: rgba(6, 214, 160, 0.1); border: 2px solid #06d6a0; color: #00a37a;';
+      case 'warning': return 'background: rgba(255, 209, 102, 0.1); border: 2px solid #ffd166; color: #b88900;';
+      case 'retry': return 'background: rgba(239, 71, 111, 0.1); border: 2px solid #ef476f; color: #d0354a;';
+      default: return 'background: var(--color-surface, #fff); border: 2px solid var(--color-border, rgba(0,0,0,0.08));';
     }
   }
 
-  // Initialize reflection section
   function initReflectSection() {
     const reflectSection = document.getElementById('reflect-section');
     if (!reflectSection) return;
 
-    const textareas = reflectSection.querySelectorAll('textarea');
-    textareas.forEach((textarea, index) => {
+    reflectSection.querySelectorAll('textarea').forEach((textarea, index) => {
       const storageKey = `teenDeen.lesson-01.reflect.${index}`;
-      
-      // Load saved value
       try {
         const saved = localStorage.getItem(storageKey);
         if (saved) textarea.value = saved;
-      } catch (err) {
-        console.warn('[Reflect] Load error:', err);
-      }
+      } catch (err) {}
 
-      // Save on input with debounce
       textarea.addEventListener('input', debounce((e) => {
         saveToLocalStorage(storageKey, e.target.value);
       }, 500));
     });
   }
 
-  // Load saved data
   function loadSavedData() {
     try {
       const savedName = localStorage.getItem('teenDeen.studentName');
       const nameInput = document.getElementById('student-name-input');
-      if (savedName && nameInput) {
-        nameInput.value = savedName;
-      }
-    } catch (err) {
-      console.warn('[Load] Error loading saved data:', err);
-    }
+      if (savedName && nameInput) nameInput.value = savedName;
+    } catch (err) {}
   }
 
-  // Build results text for sharing
   function buildResultsText() {
     const studentName = document.getElementById('student-name-input').value.trim() || 'Student';
-    const completedAt = new Date().toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-
-    return `Teen Deen — Lesson Completed
-
-Student: ${studentName}
-Lesson: ${QUIZ_CONFIG.lessonTitle}
-Result: ${quizState.passed ? 'PASSED' : 'COMPLETED'}
-Score: ${quizState.score}/${QUIZ_CONFIG.questions.length}
-Date: ${completedAt}
-
-Key takeaway: Actions are judged by intentions. Pause and check your heart before you pray, give charity, or learn Qur'an.
-
-—
-Teen Deen • Islamic Learning for Teens
-`;
+    const completedAt = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    return `Teen Deen — Lesson Completed\n\nStudent: ${studentName}\nLesson: ${QUIZ_CONFIG.lessonTitle}\nResult: ${quizState.passed ? 'PASSED' : 'COMPLETED'}\nScore: ${quizState.score}/${QUIZ_CONFIG.questions.length}\nDate: ${completedAt}\n\nKey takeaway: Actions are judged by intentions. Pause and check your heart before you pray, give charity, or learn Qur'an.\n\n—\nTeen Deen • Islamic Learning for Teens`;
   }
 
-  // Handle copy results
   function handleCopyResults() {
-    const resultsText = buildResultsText();
-    navigator.clipboard.writeText(resultsText).then(() => {
+    navigator.clipboard.writeText(buildResultsText()).then(() => {
       const statusEl = document.getElementById('share-status');
       statusEl.textContent = '✓ Results copied to clipboard!';
-      setTimeout(() => {
-        statusEl.textContent = '';
-      }, 3000);
+      setTimeout(() => statusEl.textContent = '', 3000);
     }).catch(err => {
-      console.error('[Share] Copy failed:', err);
-      const statusEl = document.getElementById('share-status');
-      statusEl.textContent = '✗ Failed to copy. Try again.';
+      document.getElementById('share-status').textContent = '✗ Failed to copy. Try again.';
     });
   }
 
-  // Handle email results
   function handleEmailResults() {
     const resultsText = buildResultsText();
-    const subject = encodeURIComponent('Teen Deen Lesson Completion');
-    const body = encodeURIComponent(resultsText);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent('Teen Deen Lesson Completion')}&body=${encodeURIComponent(resultsText)}`;
   }
 
-  // Handle web share
   function handleWebShare() {
-    const resultsText = buildResultsText();
     if (navigator.share) {
-      navigator.share({
-        title: 'Teen Deen Lesson Completed',
-        text: resultsText
-      }).catch(err => {
-        console.log('[Share] Web share cancelled or failed:', err);
-      });
+      navigator.share({ title: 'Teen Deen Lesson Completed', text: buildResultsText() }).catch(err => {});
     }
   }
 
-  // Utility: debounce
   function debounce(func, wait) {
     let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
+    return function(...args) {
       clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
+      timeout = setTimeout(() => func(...args), wait);
     };
   }
 
-  // Utility: save to localStorage
   function saveToLocalStorage(key, value) {
     try {
       localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
-    } catch (err) {
-      console.warn('[Storage] Failed to save:', key, err);
-    }
-  }
-
-  // Start initialization
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', tryInitialize);
-  } else {
-    tryInitialize();
+    } catch (err) {}
   }
 
 })();
