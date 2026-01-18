@@ -74,6 +74,8 @@
 
   function renderLesson(){
     const { id } = getQuery();
+    console.log('[renderLesson] Attempting to load lesson id:', id);
+    
     if(!id){
       document.getElementById('lesson-title').textContent = 'Lesson not found';
       document.getElementById('lesson-body').innerHTML = 'Missing lesson id. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>';
@@ -81,10 +83,13 @@
     }
     const lesson = findLessonById(id);
     if(!lesson){
+      console.error('[renderLesson] Lesson not found in manifest:', id);
       document.getElementById('lesson-title').textContent = 'Lesson not found';
       document.getElementById('lesson-body').innerHTML = 'This lesson doesn\'t exist or hasn\'t loaded yet. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>';
       return;
     }
+    
+    console.log('[renderLesson] Rendering lesson:', lesson.title);
     
     writeLastLesson(id);
     document.getElementById('lesson-title').textContent = `${lesson.number}. ${lesson.title}`;
@@ -300,7 +305,15 @@
       state.lessons = ls;
       
       if(page === 'lesson'){
-        renderLesson();
+        try {
+          renderLesson();
+        } catch (err) {
+          console.error('[renderLesson] Error:', err);
+          const lessonTitle = document.getElementById('lesson-title');
+          const lessonBody = document.getElementById('lesson-body');
+          if (lessonTitle) lessonTitle.textContent = 'Error rendering lesson';
+          if (lessonBody) lessonBody.innerHTML = `<p>An error occurred while loading the lesson.</p><p><strong>${err.message}</strong></p><a href="./" class="cta-btn" style="display: inline-block; margin-top: 12px;">Back to Lessons</a>`;
+        }
       }
       
       // Update progress count on parents page
