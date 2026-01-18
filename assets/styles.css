@@ -37,7 +37,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 body.nav-open { position: fixed; width: 100%; height: 100%; overflow: hidden; }
 main { flex: 1; padding-bottom: 60px; }
 
-img, video, svg { max-width: 100%; height: auto; display: block; }
+img, video, svg, audio { max-width: 100%; height: auto; display: block; }
 
 /* ============================================================
    SITE HEADER & NAVIGATION
@@ -499,146 +499,88 @@ img, video, svg { max-width: 100%; height: auto; display: block; }
   background: var(--color-primary); 
   border-color: var(--color-primary); 
   color: white; 
+  text-decoration: none; 
 }
 
 /* ============================================================
-   CONTENT SECTIONS
+   CONTENT SECTIONS & CARDS
    ============================================================ */
 
 .content-section { 
-  padding: 48px 24px; 
+  padding: 40px 24px; 
   max-width: 1200px; 
   margin: 0 auto; 
   width: 100%; 
 }
 
-.container-narrow { 
-  max-width: 900px; 
-  margin: 0 auto; 
-}
-
-.section-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 24px; 
-  flex-wrap: wrap; 
-  gap: 12px; 
-}
-
-.section-title { 
-  font-size: 2rem; 
-  font-weight: 700; 
-  color: var(--color-text); 
-}
-
-.status-text { 
-  color: var(--color-text-muted); 
-  font-size: 0.9rem; 
-}
-
-/* ============================================================
-   CARDS & GRID
-   ============================================================ */
-
 .card { 
   background: white; 
   border: 1px solid var(--color-border); 
   border-radius: var(--radius-lg); 
-  padding: 24px; 
+  padding: 32px; 
   box-shadow: var(--shadow-sm); 
-  transition: var(--transition-fast); 
-  text-decoration: none; 
-  display: block; 
-  color: inherit; 
 }
 
-.card:active { 
-  box-shadow: var(--shadow-md); 
-  text-decoration: none; 
-}
-
-.card-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 12px; 
-}
-
-.card-badge { 
-  background: var(--color-bg-warm); 
-  color: var(--color-primary); 
-  padding: 4px 12px; 
-  border-radius: var(--radius-sm); 
-  font-weight: 700; 
-  font-size: 0.85rem; 
-}
-
-.card-description { 
-  color: var(--color-text-muted); 
-  margin: 8px 0; 
-  line-height: 1.6; 
-}
-
-.card-meta { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-top: 16px; 
-  font-size: 0.9rem; 
-  color: var(--color-text-muted); 
-  gap: 12px; 
-  flex-wrap: wrap; 
-}
-
-.cards-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-  gap: 24px; 
-}
-
-/* NO LESSONS STATE */
-.no-lessons { 
-  grid-column: 1 / -1; 
-  text-align: center; 
-  padding: 60px 24px; 
-}
-
-.no-lessons-title { 
-  font-size: 1.5rem; 
-  font-weight: 700; 
-  color: var(--color-text); 
-  margin-bottom: 8px; 
-}
-
-.no-lessons-text { 
-  color: var(--color-text-muted); 
-  font-size: 1rem; 
-}
-
-/* ============================================================
-   LESSON CONTENT
-   ============================================================ */
-
-.lesson-content { 
-  line-height: 1.8; 
-}
-
-.lesson-content p { 
+.card p { 
   margin-bottom: 16px; 
 }
 
-.lesson-content h3 { 
+.card p:last-child { 
+  margin-bottom: 0; 
+}
+
+.card h2, 
+.card h3, 
+.card h4 { 
+  color: var(--color-text); 
+  margin-bottom: 16px; 
   margin-top: 24px; 
-  margin-bottom: 12px; 
-  font-size: 1.3rem; 
-  color: var(--color-text); 
+  line-height: 1.3; 
 }
 
-.lesson-content ul, 
-.lesson-content ol { 
-  margin-left: 24px; 
-  margin-bottom: 16px; 
+.card h2:first-child, 
+.card h3:first-child, 
+.card h4:first-child { 
+  margin-top: 0; 
+}
+
+.card a { 
+  color: var(--color-primary); 
+  font-weight: 600; 
+  text-decoration: none; 
+}
+
+.card a:hover { 
+  text-decoration: underline; 
+}
+
+/* Section Header */
+.section-header { 
+  margin-bottom: 24px; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+}
+
+.section-title { 
+  font-size: 1.75rem; 
+  font-weight: 700; 
+  color: var(--color-text); 
+  margin: 0; 
+  line-height: 1.2; 
+}
+
+/* Pills / Badges */
+.pill-label { 
+  display: inline-block; 
+  padding: 6px 12px; 
+  background: var(--color-primary); 
+  color: white; 
+  border-radius: 999px; 
+  font-weight: 600; 
+  font-size: 0.85rem; 
+  text-transform: uppercase; 
+  letter-spacing: 0.5px; 
 }
 
 /* ============================================================
@@ -648,7 +590,7 @@ img, video, svg { max-width: 100%; height: auto; display: block; }
 .site-footer { 
   background: var(--color-surface); 
   border-top: 1px solid var(--color-border); 
-  padding: 32px 24px; 
+  padding: 40px 24px; 
   margin-top: 60px; 
 }
 
@@ -657,149 +599,222 @@ img, video, svg { max-width: 100%; height: auto; display: block; }
   margin: 0 auto; 
   text-align: center; 
   color: var(--color-text-muted); 
-  font-size: 0.95rem; 
+}
+
+.footer-content p { 
+  margin: 0; 
 }
 
 /* ============================================================
-   QUIZ STYLING
-   ============================================================ */
-
-.quiz-answer-wrong {
-  border-color: #ef476f !important;
-  background-color: rgba(239, 71, 111, 0.05) !important;
-}
-
-.quiz-answer-correct {
-  border-color: #06d6a0 !important;
-  background-color: rgba(6, 214, 160, 0.05) !important;
-}
-
-.quiz-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 20px;
-}
-
-/* ============================================================
-   RESPONSIVE: MOBILE FIRST (<768px)
+   RESPONSIVE DESIGN
    ============================================================ */
 
 @media (max-width: 768px) {
-  .navbar { 
-    padding: 12px 16px; 
-    gap: 8px; 
-  }
-  
-  .navbar-brand { 
-    font-size: 1.1rem; 
-  }
-  
-  .navbar-nav { 
-    display: none;
-  }
-  
-  .navbar-hamburger { 
-    display: flex;
-  }
-  
-  .navbar-right { 
-    gap: 8px; 
-  }
-  
-  .cta-btn { 
-    padding: 10px 16px; 
-    font-size: 0.9rem; 
-  }
-  
-  .hero { 
-    padding: 40px 16px; 
-  }
-  
-  .hero-title { 
-    font-size: 2rem; 
-  }
-  
-  .hero-subtitle { 
-    font-size: 1rem; 
-  }
-  
-  .content-section { 
-    padding: 32px 16px; 
-  }
-  
-  .cards-grid { 
-    grid-template-columns: 1fr; 
-  }
-  
-  .section-title {
-    font-size: 1.5rem;
-  }
-  
-  .chipbar {
-    padding: 16px;
-  }
-  
-  .chipbar-container {
-    justify-content: flex-start;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    gap: 8px;
-  }
-  
-  .chipbar-container::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .card {
-    padding: 16px;
-  }
-  
-  .quiz-btn {
-    width: 100%;
+  .navbar { gap: 16px; padding: 12px 16px; }
+  .navbar-nav { display: none; }
+  .navbar-hamburger { display: flex; }
+  .navbar-brand { font-size: 1.1rem; }
+  .navbar-right { gap: 8px; }
+  .cta-btn { padding: 10px 16px; font-size: 0.95rem; }
+  .hero { padding: 40px 16px; }
+  .hero-title { font-size: 2rem; }
+  .hero-subtitle { font-size: 1rem; }
+  .content-section { padding: 32px 16px; }
+  .card { padding: 20px; }
+  .section-title { font-size: 1.5rem; }
+  .search-input { padding: 14px 14px 14px 44px; font-size: 1rem; }
+}
+
+@media (max-width: 480px) {
+  .navbar { padding: 12px 12px; gap: 12px; }
+  .navbar-brand { font-size: 1rem; }
+  .cta-btn, .btn-inline { padding: 10px 16px; font-size: 0.9rem; }
+  .hero { padding: 32px 12px; }
+  .hero-title { font-size: 1.75rem; margin-bottom: 12px; }
+  .hero-subtitle { font-size: 0.95rem; margin-bottom: 24px; }
+  .content-section { padding: 24px 12px; }
+  .card { padding: 16px; }
+  .section-title { font-size: 1.25rem; }
+  .chipbar-container { gap: 8px; }
+  .chip { padding: 6px 12px; font-size: 0.85rem; }
+}
+
+/* ============================================================
+   AUDIO PLAYER STYLES
+   ============================================================ */
+
+#audio-player-container {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+#audio-player-container audio {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+}
+
+/* Ensure audio controls are always visible on mobile */
+@media (max-width: 768px) {
+  #audio-player-container audio {
+    height: 40px;
   }
 }
 
 /* ============================================================
-   EXTRA SMALL: <390px (iPhone SE, very small phones)
+   QUIZ CTA CARD STYLES
    ============================================================ */
 
-@media (max-width: 390px) {
-  :root {
-    --text-base: 0.95rem;
+.quiz-cta-card {
+  padding: 40px 32px;
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.1) 0%, rgba(255, 159, 67, 0.05) 100%);
+  border: 2px solid var(--color-secondary);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quiz-cta-card h3 {
+  color: var(--color-text);
+}
+
+.quiz-cta-card p {
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 768px) {
+  .quiz-cta-card {
+    padding: 28px 20px;
   }
   
-  .navbar {
-    padding: 10px 12px;
-    gap: 6px;
+  .quiz-cta-card h3 {
+    font-size: 1.1em;
   }
   
-  .navbar-brand {
-    font-size: 1rem;
+  .quiz-cta-card p {
+    font-size: 0.95em;
   }
-  
-  .cta-btn {
-    padding: 8px 12px;
-    font-size: 0.8rem;
+}
+
+/* Hidden state for quiz questions until CTA is clicked */
+#quiz-questions-wrapper {
+  transition: all 0.3s ease-out;
+}
+
+#quiz-questions-wrapper.visible {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-  
-  .hero {
-    padding: 32px 12px;
+  to {
+    opacity: 1;
   }
-  
-  .hero-title {
-    font-size: 1.5rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 0.9rem;
-  }
-  
-  .content-section {
-    padding: 24px 12px;
-  }
-  
-  .card {
-    padding: 12px;
-  }
+}
+
+/* ============================================================
+   HIDDEN / UTILITY CLASSES
+   ============================================================ */
+
+.hidden { 
+  display: none !important; 
+}
+
+.no-lessons { 
+  text-align: center; 
+  padding: 60px 24px; 
+}
+
+.no-lessons-title { 
+  font-size: 1.5rem; 
+  font-weight: 700; 
+  color: var(--color-text); 
+  margin-bottom: 12px; 
+}
+
+.no-lessons-text { 
+  color: var(--color-text-muted); 
+  margin-bottom: 24px; 
+}
+
+.lesson-content {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.lesson-content img,
+.lesson-content video {
+  max-width: 100%;
+  height: auto;
+  margin: 16px 0;
+  border-radius: var(--radius-md);
+}
+
+/* ============================================================
+   QUIZ STYLES
+   ============================================================ */
+
+.quiz-actions { 
+  display: flex; 
+  gap: 12px; 
+  flex-wrap: wrap; 
+}
+
+.quiz-choice-label { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  padding: 12px 16px; 
+  border: 2px solid var(--color-border); 
+  border-radius: var(--radius-md); 
+  cursor: pointer; 
+  transition: all var(--transition-fast); 
+  background: white; 
+  user-select: none; 
+  min-height: 44px;
+}
+
+.quiz-choice-label:active { 
+  border-color: var(--color-primary); 
+  background: var(--color-bg-warm); 
+}
+
+.quiz-choice-label input[type="radio"] { 
+  cursor: pointer; 
+  flex-shrink: 0; 
+}
+
+.quiz-question-block { 
+  padding: 20px; 
+  background: white; 
+  border: 2px solid var(--color-border); 
+  border-radius: var(--radius-md); 
+  margin-bottom: 16px; 
+}
+
+.quiz-feedback { 
+  padding: 12px 16px; 
+  border-radius: var(--radius-sm); 
+  font-size: 0.95em; 
+  line-height: 1.6; 
+}
+
+.quiz-feedback.hidden { 
+  display: none !important; 
 }
