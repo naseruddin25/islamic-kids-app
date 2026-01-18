@@ -1,8 +1,9 @@
 (function(){
   const page = document.body.getAttribute('data-page');
-  const ASSET_PREFIX = (page === 'lessons' || page === 'lesson') ? '../' : '';
-  const LESSONS_URL = ASSET_PREFIX + 'assets/lessons.json';
-  const SW_URL = ASSET_PREFIX + 'sw.js';
+  
+  // Use the centralized base path helper
+  const withBase = window.BasePath ? window.BasePath.withBase : (p) => p;
+  const LESSONS_URL = withBase('assets/lessons.json');
 
   const state = {
     lessons: [],
@@ -15,30 +16,33 @@
   const writeLastLesson = (id) => { try { localStorage.setItem('lastLessonId', id); } catch {} };
 
   async function loadLessons(){
-    const paths = ['../assets/lessons.json', './assets/lessons.json', 'assets/lessons.json'];
-    let lastError = null;
-    
-    for(const path of paths){
-      try {
-        const res = await fetch(path);
-        if(res.ok){
-          const data = await res.json();
-          console.log(`[loadLessons] Loaded from ${path}`);
-          return data.lessons || [];
-        }
-        lastError = `${path}: HTTP ${res.status}`;
-      } catch(e) {
-        lastError = `${path}: ${e.message}`;
+    try {
+      console.log(`[loadLessons] Fetching from: ${LESSONS_URL}`);
+      const res = await fetch(LESSONS_URL);
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} when fetching ${LESSONS_URL}`);
       }
+      
+      const data = await res.json();
+      console.log(`[loadLessons] Successfully loaded ${(data.lessons || []).length} lessons`);
+      
+      // Log diagnostic info if debug mode
+      if (window.BasePath && window.BasePath.isDebugMode()) {
+        console.log('[loadLessons] Debug mode active - lessons loaded:', data.lessons);
+      }
+      
+      return data.lessons || [];
+    } catch(err) {
+      console.error('[loadLessons] Failed to load lessons:', err);
+      throw new Error(`Failed to load lessons from ${LESSONS_URL}: ${err.message}`);
     }
-    
-    throw new Error(`Failed to load lessons from any path. Tried: ${paths.join(', ')}. Last error: ${lastError}`);
   }
 
   function renderFeatured(container){
     const featured = state.lessons.slice(0, 3);
     container.innerHTML = featured.map(l => `
-      <a class="card" href="lessons/lesson.html?id=${encodeURIComponent(l.id)}">
+      <a class="card" href="${withBase(`lessons/lesson.html?id=${encodeURIComponent(l.id)}`)}">
         <div class="badge">Lesson ${l.number}</div>
         <h3>${l.title}</h3>
         <p class="meta">${l.minutes} min • ${l.tags.join(', ')}</p>
@@ -68,7 +72,7 @@
       return;
     }
     container.innerHTML = list.map(l => `
-      <a class="card" href="lesson.html?id=${encodeURIComponent(l.id)}">
+      <a class="card" href="${withBase(`lessons/lesson.html?id=${encodeURIComponent(l.id)}`)}">
         <div class="badge">Lesson ${l.number}</div>
         <h3>${l.title}</h3>
         <p class="meta">${l.minutes} min • ${l.tags.join(', ')}</p>
@@ -92,13 +96,13 @@
     const { id } = getQuery();
     if(!id){
       document.getElementById('lesson-title').textContent = 'Lesson not found';
-      document.getElementById('lesson-body').innerHTML = 'Missing lesson id. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>';
+      document.getElementById('lesson-body').innerHTML = `Missing lesson id. <a href="${withBase('lessons/')}" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>`;
       return;
     }
     const lesson = findLessonById(id);
     if(!lesson){
       document.getElementById('lesson-title').textContent = 'Lesson not found';
-      document.getElementById('lesson-body').innerHTML = 'This lesson doesn\'t exist or hasn\'t loaded yet. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>';
+      document.getElementById('lesson-body').innerHTML = `This lesson doesn't exist or hasn't loaded yet. <a href="${withBase('lessons/')}" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>`;
       return;
     }
     writeLastLesson(id);
@@ -271,22 +275,32 @@
   function init(){
     // Register service worker (best-effort)
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.register(SW_URL).catch(()=>{});
+      const swUrl = withBase('sw.js');
+      navigator.serviceWorker.register(swUrl).catch((err)=>{
+        console.warn('[SW] Registration failed:', err);
+      });
     }
     state.lastLessonId = readLastLesson();
     loadLessons().then(ls => {
       state.lessons = ls;
+      
+      // Log debug info if enabled
+      if (window.BasePath && window.BasePath.isDebugMode()) {
+        console.log('[app.js] Loaded lessons count:', ls.length);
+        console.log('[app.js] Current page:', page);
+      }
+      
       if(page === 'home'){
         const featuredEl = document.getElementById('home-featured');
         renderFeatured(featuredEl);
         const resumeBtn = document.getElementById('cta-resume');
         if(state.lastLessonId){
           resumeBtn.classList.remove('hidden');
-          resumeBtn.href = `lessons/lesson.html?id=${encodeURIComponent(state.lastLessonId)}`;
+          resumeBtn.href = withBase(`lessons/lesson.html?id=${encodeURIComponent(state.lastLessonId)}`);
         }
         const homeSearch = document.getElementById('home-search');
         onSearch(homeSearch, (q)=>{
-          location.href = `lessons/?q=${encodeURIComponent(q)}`;
+          location.href = withBase(`lessons/?q=${encodeURIComponent(q)}`);
         });
         // Progress panel
         const progressCountEl = document.getElementById('progress-count');
@@ -335,9 +349,20 @@
       const offline = !navigator.onLine;
       const errorMsg = err.message || 'Unknown error';
       
+      // Show user-friendly error with technical details
+      const errorDetails = window.BasePath ? `
+        <details style="margin-top:12px;">
+          <summary style="cursor:pointer;color:#666;">Technical details</summary>
+          <pre style="margin-top:8px;font-size:0.85em;color:#666;white-space:pre-wrap;">Error: ${errorMsg}
+Attempted URL: ${LESSONS_URL}
+Base Path: ${window.BasePath.getBase() || '(root)'}
+Current Location: ${window.location.href}</pre>
+        </details>
+      ` : `<p style="margin-top:8px;font-size:0.85em;color:#666;">${errorMsg}</p>`;
+      
       if(page === 'home'){
         const featuredEl = document.getElementById('home-featured');
-        featuredEl.innerHTML = `<div class="card error-card"><strong>${offline?'Offline':'Error loading lessons'}</strong><p>${offline?'You're offline. Content you've already opened is still available.':errorMsg}</p></div>`;
+        featuredEl.innerHTML = `<div class="card error-card"><strong>${offline?'Offline':'Error loading lessons'}</strong><p>${offline?'You're offline. Content you've already opened is still available.':'Unable to load lessons. Please check the console or add ?debug=1 to the URL for details.'}</p>${offline?'':errorDetails}</div>`;
       }
       if(page === 'lessons'){
         const statusEl = document.getElementById('lessons-status');
@@ -345,13 +370,13 @@
         statusEl.textContent = '';
         listEl.innerHTML = `<div class="card error-card">
           <strong>${offline?'Offline':'Couldn't load lessons'}</strong>
-          <p>${offline?'You're offline. Content you've already opened is still available.':'Check that assets/lessons.json exists and that relative paths are correct for /lessons/.'}</p>
-          ${offline?'':`<details style="margin-top:12px;"><summary style="cursor:pointer;color:#666;">Technical details</summary><pre style="margin-top:8px;font-size:0.85em;color:#666;white-space:pre-wrap;">${errorMsg}</pre></details>`}
+          <p>${offline?'You're offline. Content you've already opened is still available.':'Unable to fetch lessons data. This usually happens when the base path is incorrect for GitHub Pages deployment.'}</p>
+          ${offline?'':errorDetails}
         </div>`;
       }
       if(page === 'lesson'){
         document.getElementById('lesson-title').textContent = offline?'Offline':'Error loading lesson';
-        document.getElementById('lesson-body').innerHTML = offline?'You\'re offline. Reconnect to load this lesson. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>':'Unable to load lesson content. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>';
+        document.getElementById('lesson-body').innerHTML = offline?`You're offline. Reconnect to load this lesson. <a href="${withBase('lessons/')}" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>`:`Unable to load lesson content. <a href="${withBase('lessons/')}" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>${errorDetails}`;
       }
     });
   }
