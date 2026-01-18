@@ -1,0 +1,197 @@
+/**
+ * LESSON 01 QUIZ STYLES
+ * Provides mobile-friendly, accessible styling for quiz interactions
+ */
+
+/* Quiz Button Base Styles */
+.quiz-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md, 12px);
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 150ms ease;
+  min-height: 44px;
+  white-space: nowrap;
+  user-select: none;
+  text-decoration: none;
+}
+
+.quiz-btn:focus-visible {
+  outline: 3px solid var(--color-secondary, #f76c5e);
+  outline-offset: 2px;
+}
+
+.quiz-btn:active {
+  transform: translateY(1px);
+}
+
+/* Primary Button */
+.quiz-btn-primary {
+  background: linear-gradient(135deg, var(--color-primary, #ff9f43), var(--color-primary-light, #ffb86c));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3);
+}
+
+.quiz-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 159, 67, 0.4);
+}
+
+.quiz-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Secondary Button */
+.quiz-btn-secondary {
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #2f1b0f);
+  border: 2px solid var(--color-border, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.quiz-btn-secondary:hover {
+  background: var(--color-bg-warm, #fff7ec);
+  border-color: var(--color-primary, #ff9f43);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Quiz Choice Labels - Enhanced Hover and Tap Targets */
+.quiz-choice-label {
+  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 16px !important;
+  border: 2px solid var(--color-border, rgba(0, 0, 0, 0.08)) !important;
+  border-radius: var(--radius-sm, 8px) !important;
+  cursor: pointer !important;
+  transition: all 150ms ease !important;
+  min-height: 44px !important;
+  user-select: none !important;
+  background: var(--color-surface, #fff) !important;
+}
+
+.quiz-choice-label:hover {
+  background: var(--color-bg-warm, #fff7ec) !important;
+  border-color: var(--color-primary, #ff9f43) !important;
+  transform: translateX(2px) !important;
+}
+
+.quiz-choice-label:has(input:checked) {
+  background: rgba(255, 159, 67, 0.1) !important;
+  border-color: var(--color-primary, #ff9f43) !important;
+  font-weight: 600 !important;
+}
+
+.quiz-choice-label:has(input:focus-visible) {
+  outline: 3px solid var(--color-secondary, #f76c5e);
+  outline-offset: 2px;
+}
+
+/* Radio Input Styling */
+.quiz-choice-label input[type="radio"] {
+  width: 20px !important;
+  height: 20px !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  accent-color: var(--color-primary, #ff9f43);
+}
+
+/* Disabled state */
+.quiz-choice-label.disabled {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+/* Feedback Styles */
+.quiz-feedback {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.quiz-feedback.correct {
+  background: rgba(6, 214, 160, 0.1);
+  border-left: 4px solid #06d6a0;
+  color: #00a37a;
+}
+
+.quiz-feedback.incorrect {
+  background: rgba(239, 71, 111, 0.1);
+  border-left: 4px solid #ef476f;
+  color: #d0354a;
+}
+
+/* Hidden utility class */
+.hidden {
+  display: none !important;
+}
+
+/* Mobile Optimization */
+@media (max-width: 640px) {
+  .quiz-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .quiz-choice-label {
+    padding: 14px 16px !important;
+    min-height: 48px !important;
+  }
+
+  .quiz-choice-label span {
+    font-size: 0.95em;
+  }
+}
+
+/* Touch device optimization */
+@media (hover: none) and (pointer: coarse) {
+  .quiz-choice-label {
+    min-height: 48px !important;
+  }
+
+  .quiz-choice-label:active {
+    background: var(--color-bg-warm, #fff7ec) !important;
+    border-color: var(--color-primary, #ff9f43) !important;
+  }
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .quiz-btn,
+  .quiz-choice-label {
+    transition: none !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .quiz-btn,
+  #quiz-sharing {
+    display: none !important;
+  }
+
+  .quiz-choice-label {
+    break-inside: avoid;
+  }
+}
