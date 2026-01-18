@@ -97,10 +97,8 @@
 
     // Resolve base path for GitHub Pages
     const getBasePath = () => {
-      if (window.location.pathname.includes('/islamic-kids-app/')) {
-        return '/islamic-kids-app';
-      }
-      return '';
+      const base = window.location.pathname.startsWith('/islamic-kids-app/') ? '/islamic-kids-app' : '';
+      return base;
     };
 
     const basePath = getBasePath();
@@ -124,6 +122,7 @@
         </div>
         
         <div id="audio-error" class="audio-error"></div>
+        <a id="audio-fallback-link" class="audio-fallback" href="" target="_blank" rel="noopener">Open audio in new tab</a>
       </div>
     `;
 
@@ -131,16 +130,45 @@
     const sourceElement = document.getElementById('audio-source');
     const narratorSelect = document.getElementById('narrator-select');
     const errorDiv = document.getElementById('audio-error');
+    const fallbackLink = document.getElementById('audio-fallback-link');
+
+    const showError = (msg) => {
+      errorDiv.textContent = msg;
+      errorDiv.classList.add('visible');
+    };
+
+    const clearError = () => {
+      errorDiv.textContent = '';
+      errorDiv.classList.remove('visible');
+    };
+
+    const runHeadCheck = async () => {
+      const audioUrl = audioElement.src;
+      try {
+        const response = await fetch(audioUrl, { method: 'HEAD', cache: 'no-store' });
+        if (!response.ok) {
+          console.warn('[Audio] HEAD request failed:', response.status, audioUrl);
+          showError(`Audio file not found (${response.status}): ${audioUrl}`);
+        } else {
+          console.log('[Audio] File verified with HEAD request:', audioUrl);
+        }
+      } catch (err) {
+        console.warn('[Audio] HEAD fetch error:', err);
+      }
+    };
 
     // Set initial audio source
     const setAudioSource = (narrator) => {
       if (audioConfig[narrator]) {
         const audioUrl = `${basePath}/audio/${audioConfig[narrator]}`;
-        sourceElement.src = audioUrl;
-        console.log('[Audio] Set narrator to:', narrator, '| resolved src:', audioUrl);
+        audioElement.src = audioUrl;
+        if (sourceElement) sourceElement.src = audioUrl;
+        if (fallbackLink) fallbackLink.href = audioUrl;
+        console.log('[Audio] Set narrator to:', narrator, '| src:', audioUrl);
+        console.log('[Audio] src:', audioElement.src);
         audioElement.load();
-        errorDiv.classList.remove('visible');
-        errorDiv.textContent = '';
+        clearError();
+        runHeadCheck();
       }
     };
 
@@ -165,7 +193,7 @@
     // Audio event listeners for debugging and error handling
     audioElement.addEventListener('loadedmetadata', () => {
       console.log('[Audio] Loaded metadata | duration:', audioElement.duration);
-      errorDiv.classList.remove('visible');
+      clearError();
     });
 
     audioElement.addEventListener('canplay', () => {
@@ -181,8 +209,8 @@
     });
 
     audioElement.addEventListener('error', (e) => {
-      console.error('[Audio] Error event:', audioElement.error);
-      const audioUrl = sourceElement.src;
+      console.error('Audio error', audioElement.src, audioElement.error);
+      const audioUrl = audioElement.src || sourceElement.src;
       let errorMsg = 'Audio failed to load. ';
       
       if (audioElement.error) {
@@ -204,26 +232,8 @@
         }
       }
       
-      errorDiv.textContent = errorMsg;
-      errorDiv.classList.add('visible');
+      showError(errorMsg);
     });
-
-    // Optional: Do a HEAD fetch to verify file exists
-    (async () => {
-      try {
-        const audioUrl = sourceElement.src;
-        const response = await fetch(audioUrl, { method: 'HEAD', cache: 'no-store' });
-        if (!response.ok) {
-          console.warn('[Audio] HEAD request failed:', response.status, audioUrl);
-          errorDiv.textContent = `Audio file not found (${response.status}): ${audioUrl}`;
-          errorDiv.classList.add('visible');
-        } else {
-          console.log('[Audio] File verified with HEAD request:', audioUrl);
-        }
-      } catch (err) {
-        console.warn('[Audio] HEAD fetch error:', err);
-      }
-    })();
   }
 
   function renderLesson(){
