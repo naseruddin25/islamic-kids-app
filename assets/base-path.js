@@ -92,6 +92,21 @@
     console.groupEnd();
   }
 
+  /**
+   * Set the HTML base element href for proper relative path resolution
+   */
+  function setBaseHref() {
+    const baseElement = document.querySelector('base');
+    if (baseElement) {
+      // Set base href to the base path
+      const baseHref = BASE_PATH ? `${BASE_PATH}/` : '/';
+      baseElement.href = baseHref;
+      if (isDebugMode()) {
+        console.log('Set <base> href to:', baseHref);
+      }
+    }
+  }
+
   // Expose to global scope
   window.BasePath = {
     withBase: withBase,
@@ -100,10 +115,14 @@
     logDiagnostics: logDiagnostics
   };
 
-  // Auto-log diagnostics on load if debug mode is active
+  // Set base href immediately when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', logDiagnostics);
+    document.addEventListener('DOMContentLoaded', () => {
+      setBaseHref();
+      logDiagnostics();
+    });
   } else {
+    setBaseHref();
     logDiagnostics();
   }
 
