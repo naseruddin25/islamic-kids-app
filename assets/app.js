@@ -163,23 +163,23 @@
           explain: 'Actions are judged by intentions; Allah rewards sincerity.'
         },
         {
-          q: 'Q2. If someone prays mainly to impress others, what’s the main problem?',
+          q: 'Q2. If someone prays mainly to impress others, what's the main problem?',
           choices: [
             { val: 'A', text: 'Prayer is always wrong' },
             { val: 'B', text: 'Their intention is not for Allah' },
             { val: 'C', text: 'They prayed at the wrong time' },
-            { val: 'D', text: 'They didn’t pray long enough' }
+            { val: 'D', text: 'They didn't pray long enough' }
           ],
           correct: 'B',
-          explain: 'Worship should be for Allah, not for people’s approval.'
+          explain: 'Worship should be for Allah, not for people's approval.'
         },
         {
           q: 'Q3. Why did many scholars start their books with the teaching about intentions?',
           choices: [
-            { val: 'A', text: 'It’s the easiest topic' },
-            { val: 'B', text: 'It reminds people that “why” matters before “what”' },
-            { val: 'C', text: 'It’s only for beginners' },
-            { val: 'D', text: 'It’s a history lesson' }
+            { val: 'A', text: 'It's the easiest topic' },
+            { val: 'B', text: 'It reminds people that "why" matters before "what"' },
+            { val: 'C', text: 'It's only for beginners' },
+            { val: 'D', text: 'It's a history lesson' }
           ],
           correct: 'B',
           explain: 'It sets the foundation: sincerity comes first.'
@@ -196,7 +196,7 @@
           explain: 'The key is doing it to please Allah, not people.'
         },
         {
-          q: 'Q5. What’s a simple habit to improve sincerity?',
+          q: 'Q5. What's a simple habit to improve sincerity?',
           choices: [
             { val: 'A', text: 'Never do good deeds in public' },
             { val: 'B', text: 'Check your intention before and during the action' },
@@ -296,6 +296,26 @@
             // Dedicated key for lesson-01
             try { localStorage.setItem('teenDeen.lesson-01.score', String(quizScore)); } catch {}
           } catch {}
+
+          // Integrate certificate of completion
+          if (window.TeenDeenCertificate && typeof window.TeenDeenCertificate.renderCertificatePanel === 'function') {
+            try {
+              // Check if student passed and render certificate panel
+              const passed = window.TeenDeenCertificate.checkIfPassed(lesson.id, quizScore, totalQuestions);
+              if (passed) {
+                window.TeenDeenCertificate.renderCertificatePanel({
+                  lessonId: lesson.id,
+                  lessonTitle: lesson.title,
+                  score: quizScore,
+                  total: totalQuestions,
+                  passed: true
+                });
+              }
+            } catch (certErr) {
+              console.warn('[Certificate] Error rendering certificate panel:', certErr);
+            }
+          }
+
           return;
         }
 
@@ -315,6 +335,25 @@
           scores[lesson.id] = { score: quizScore, total: 1, ts: Date.now() };
           localStorage.setItem('lessonScores', JSON.stringify(scores));
         } catch {}
+
+        // Integrate certificate of completion
+        if (window.TeenDeenCertificate && typeof window.TeenDeenCertificate.renderCertificatePanel === 'function') {
+          try {
+            // Check if student passed and render certificate panel
+            const passed = window.TeenDeenCertificate.checkIfPassed(lesson.id, quizScore, 1);
+            if (passed) {
+              window.TeenDeenCertificate.renderCertificatePanel({
+                lessonId: lesson.id,
+                lessonTitle: lesson.title,
+                score: quizScore,
+                total: 1,
+                passed: true
+              });
+            }
+          } catch (certErr) {
+            console.warn('[Certificate] Error rendering certificate panel:', certErr);
+          }
+        }
       };
     }
 
@@ -498,28 +537,23 @@
       const errorMsg = err.message || 'Unknown error';
       const basePath = window.BASE_PATH || '(not set)';
       
-      if(page === 'lesson'){
-        document.getElementById('lesson-title').textContent = offline ? 'Offline' : 'Error loading lesson';
-        document.getElementById('lesson-body').innerHTML = offline ? 
-          'You\'re offline. Reconnect to load this lesson. <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>' : 
-          `
-            <p>Unable to load lesson content.</p>
-            <details style="margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.05); border-radius: 4px;">
-              <summary style="cursor: pointer; font-weight: 600;">Technical Details</summary>
-              <pre style="margin-top: 8px; font-size: 0.85em; white-space: pre-wrap; color: #666;">
-Error: ${errorMsg}
-
-Base Path: ${basePath}
-Current Location: ${window.location.pathname}
-
-Suggestion: Add ?debug=1 to the URL to see diagnostic overlay.
-              </pre>
-            </details>
-            <a href="./" class="btn btn-secondary" style="margin-top:12px; display:inline-block;">Back to lessons</a>
-          `;
+      // If we're offline and have a service worker, it might still work
+      if (offline) {
+        console.warn('[init] Device is offline. Service worker may still provide cached content.');
+      }
+      
+      // Don't show error on lesson page if we're just loading the lesson list
+      if (page !== 'lesson') {
+        alert(`Could not load lessons.\n\n${errorMsg}\n\nPlease check your connection and refresh the page.`);
       }
     });
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  // Start the app when DOM is ready
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
 })();
