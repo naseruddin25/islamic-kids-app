@@ -11,6 +11,7 @@
     currentCategory: 'all',
     currentMode: 'all', // 'all' or 'quiz'
     completedLessons: new Set(),
+    lessonsWithQuiz: new Set(),
   };
 
   // Render Start Learning intro idempotently
@@ -58,8 +59,7 @@
     return state.allLessons.filter(lesson => {
       // Mode filter (quiz mode shows only lessons with quiz data)
       if (state.currentMode === 'quiz') {
-        // For now, all lessons have a quiz, but this is future-proof
-        // if (!lesson.quiz || !lesson.quiz.length) return false;
+        if (!state.lessonsWithQuiz.has(lesson.id)) return false;
       }
       
       // Category filter
@@ -80,10 +80,11 @@
     const isCompleted = state.completedLessons.has(lesson.id);
     const badge = `Lesson ${String(lesson.number).padStart(2, '0')}`;
     
-    // Use withBase() for lesson links
     const lessonUrl = window.withBase ? 
       window.withBase(`lessons/lesson.html?id=${encodeURIComponent(lesson.id)}`) :
       `lessons/lesson.html?id=${encodeURIComponent(lesson.id)}`;
+    
+    const ctaLabel = state.currentMode === 'quiz' ? 'Start Quiz' : (isCompleted ? 'Review' : 'Start');
     
     return `
       <a href="${lessonUrl}" class="card">
@@ -95,7 +96,7 @@
         <p class="card-description">${lesson.tags.join(' • ')}</p>
         <div class="card-meta">
           <span>⏱ ${lesson.minutes} min</span>
-          <span>${isCompleted ? 'Completed' : 'Start'}</span>
+          <span>${ctaLabel}</span>
         </div>
       </a>
     `;
@@ -126,7 +127,6 @@
       }
     }
 
-    // Update debug info
     if (window.updateDebugInfo) {
       window.updateDebugInfo({ lessonsCount: state.allLessons.length });
     }
@@ -141,7 +141,6 @@
       updateDisplay();
     });
 
-    // Allow Enter key to navigate if single result
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         const filtered = filterLessons(state.currentSearch, state.currentCategory);
@@ -197,99 +196,71 @@
   }
 
   async function loadLessons() {
-    // Use withBase() to get correct path for GitHub Pages
     const manifestUrl = window.withBase ? window.withBase('data/lessons.json') : 'data/lessons.json';
-    
     try {
       console.log('[loadLessons] Fetching from:', manifestUrl);
       const res = await fetch(manifestUrl, { cache: 'no-store' });
-      
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText} - Failed to load ${manifestUrl}`);
-      }
-      
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText} - Failed to load ${manifestUrl}`);
       const data = await res.json();
       console.log('[loadLessons] Successfully loaded', (data.lessons || []).length, 'lessons');
       return data.lessons || [];
-      
     } catch (error) {
       console.error('[loadLessons] Error:', error);
-      
-      // Update debug info
       if (window.updateDebugInfo) {
         window.updateDebugInfo({ 
           lastError: `${error.message}\n\nAttempted URL: ${manifestUrl}\nBase path: ${window.BASE_PATH || '(none)'}` 
         });
       }
-      
       throw error;
     }
   }
 
-  async function init() {
-    if (window.__teenDeenLessonsInit) {
-      console.count('[TeenDeen] initLessonsPage');
-      return;
+  async function loadQuizIndex() {
+    const indexUrl = window.withBase ? window.withBase('data/quizzes/index.json') : 'data/quizzes/index.json';
+    try {
+      const res = await fetch(indexUrl, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      state.lessonsWithQuiz = new Set(data.lessonsWithQuiz || []);
+      console.log('[QuizIndex] Loaded:', Array.from(state.lessonsWithQuiz));
+    } catch (err) {
+      console.warn('[QuizIndex] Could not load quiz index:', err.message);
+      state.lessonsWithQuiz = new Set();
     }
+  }
+
+  async function init() {
+    if (window.__teenDeenLessonsInit) { console.count('[TeenDeen] initLessonsPage'); return; }
     window.__teenDeenLessonsInit = true;
     console.count('[TeenDeen] initLessonsPage');
     console.log('[TeenDeen] main.js loaded on', location.pathname);
     
-    // Check for quiz mode via URL parameter
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('mode') === 'quiz') {
       state.currentMode = 'quiz';
-      
-      // Update page title and hero
-      const heroTitle = document.querySelector('.hero-title');
-      if (heroTitle) {
-        heroTitle.textContent = 'Quizzes';
-      }
-      const heroSubtitle = document.querySelector('.hero-subtitle');
-      if (heroSubtitle) {
-        heroSubtitle.textContent = 'Test your knowledge with self-check quizzes for every lesson.';
-      }
-      const sectionTitle = document.querySelector('.section-title');
-      if (sectionTitle && sectionTitle.textContent.includes('Browse')) {
-        sectionTitle.textContent = 'All Quizzes';
-      }
-      
-      // Update nav highlighting: remove from Lessons, add to Quizzes
-      const navLinks = document.querySelectorAll('.navbar-nav .nav-pill');
-      navLinks.forEach(link => {
-        const href = link.getAttribute('href');
-        // Remove aria-current from all links first
-        link.removeAttribute('aria-current');
-        // Add it to Quizzes link (contains ?mode=quiz)
-        if (href && href.includes('mode=quiz')) {
-          link.setAttribute('aria-current', 'page');
-        }
-      });
+      const heroTitle = document.querySelector('.hero-title'); if (heroTitle) heroTitle.textContent = 'Quizzes';
+      const heroSubtitle = document.querySelector('.hero-subtitle'); if (heroSubtitle) heroSubtitle.textContent = 'Test your knowledge with self-check quizzes.';
+      const sectionTitle = document.querySelector('.section-title'); if (sectionTitle && sectionTitle.textContent.includes('Browse')) sectionTitle.textContent = 'All Quizzes';
+      const modeQuiz = document.getElementById('mode-quiz'); if (modeQuiz) modeQuiz.classList.add('chip');
     }
     
     try {
-      // Register service worker
       if ('serviceWorker' in navigator) {
         const swUrl = window.withBase ? window.withBase('sw.js') : 'sw.js';
-        navigator.serviceWorker.register(swUrl).catch((err) => {
-          console.warn('[SW] Registration failed:', err);
-        });
+        navigator.serviceWorker.register(swUrl).catch((err) => console.warn('[SW] Registration failed:', err));
       }
 
-      // Render static intro once
       renderStartLearningIntro();
 
-      // Load data
+      await loadQuizIndex();
       state.allLessons = await loadLessons();
       loadCompletedLessons();
       updateProgressCount();
 
-      // Setup interactive elements
       setupSearch();
       setupChips();
       setupCTA();
 
-      // Initial render
       updateDisplay();
       
     } catch (err) {
@@ -298,7 +269,6 @@
       if (grid) {
         const offline = !navigator.onLine;
         const basePath = window.BASE_PATH || '(not set)';
-        
         grid.innerHTML = `
           <div class="no-lessons">
             <p class="no-lessons-title">${offline ? 'Offline' : 'Error loading lessons'}</p>
@@ -325,14 +295,12 @@ Suggestion: Add ?debug=1 to the URL to see diagnostic info.
     }
   }
 
-  // Initialize when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 
-  // Parent phone storage (for parents page)
   if (document.body.getAttribute('data-page') === 'parents') {
     const phoneInput = document.getElementById('parent-phone');
     if (phoneInput) {
@@ -340,12 +308,7 @@ Suggestion: Add ?debug=1 to the URL to see diagnostic info.
         const saved = localStorage.getItem('parentPhone');
         if (saved) phoneInput.value = saved;
       } catch {}
-
-      phoneInput.addEventListener('change', () => {
-        try {
-          localStorage.setItem('parentPhone', phoneInput.value || '');
-        } catch {}
-      });
+      phoneInput.addEventListener('change', () => { try { localStorage.setItem('parentPhone', phoneInput.value || ''); } catch {} });
     }
   }
 })();
