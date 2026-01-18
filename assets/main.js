@@ -3,6 +3,9 @@
 // ==========================================
 
 (function() {
+  // Use the centralized base path helper
+  const withBase = window.BasePath ? window.BasePath.withBase : (p) => p;
+  
   const state = {
     allLessons: [],
     currentSearch: '',
@@ -48,8 +51,14 @@
     const isCompleted = state.completedLessons.has(lesson.id);
     const badge = `Lesson ${String(lesson.number).padStart(2, '0')}`;
     
+    // Determine correct link based on current page
+    const currentPage = document.body.getAttribute('data-page');
+    const lessonLink = currentPage === 'home' 
+      ? withBase(`lessons/lesson.html?id=${encodeURIComponent(lesson.id)}`)
+      : withBase(`lesson.html?id=${encodeURIComponent(lesson.id)}`);
+    
     return `
-      <a href="lessons/lesson.html?id=${encodeURIComponent(lesson.id)}" class="card">
+      <a href="${lessonLink}" class="card">
         <div class="card-header">
           <span class="card-badge">${badge}</span>
           ${isCompleted ? '<span style="font-size: 18px;">✓</span>' : ''}
@@ -69,6 +78,8 @@
     const grid = document.getElementById('lessons-grid');
     const statusEl = document.getElementById('filter-status');
 
+    if (!grid) return; // Guard for pages without lessons grid
+
     if (filteredLessons.length === 0) {
       grid.innerHTML = `
         <div class="no-lessons">
@@ -76,11 +87,15 @@
           <p class="no-lessons-text">Try adjusting your search or category filters.</p>
         </div>
       `;
-      statusEl.textContent = state.currentSearch ? `No results for "${state.currentSearch}"` : '';
+      if (statusEl) {
+        statusEl.textContent = state.currentSearch ? `No results for "${state.currentSearch}"` : '';
+      }
     } else {
       grid.innerHTML = filteredLessons.map(renderLessonCard).join('');
       const count = filteredLessons.length;
-      statusEl.textContent = state.currentSearch ? `Showing ${count} result(s)` : '';
+      if (statusEl) {
+        statusEl.textContent = state.currentSearch ? `Showing ${count} result(s)` : '';
+      }
     }
   }
 
@@ -98,7 +113,11 @@
       if (e.key === 'Enter') {
         const filtered = filterLessons(state.currentSearch, state.currentCategory);
         if (filtered.length === 1) {
-          window.location.href = `lessons/lesson.html?id=${encodeURIComponent(filtered[0].id)}`;
+          const currentPage = document.body.getAttribute('data-page');
+          const lessonLink = currentPage === 'home'
+            ? withBase(`lessons/lesson.html?id=${encodeURIComponent(filtered[0].id)}`)
+            : withBase(`lesson.html?id=${encodeURIComponent(filtered[0].id)}`);
+          window.location.href = lessonLink;
         }
       }
     });
@@ -123,7 +142,7 @@
     const startBtn = document.getElementById('start-btn');
     if (startBtn) {
       startBtn.addEventListener('click', () => {
-        window.location.href = 'lessons/';
+        window.location.href = withBase('lessons/');
       });
     }
   }
@@ -145,31 +164,34 @@
   }
 
   async function loadLessons() {
-    const paths = ['./assets/lessons.json', 'assets/lessons.json', '../assets/lessons.json'];
-    let lastError = null;
-
-    for (const path of paths) {
-      try {
-        const res = await fetch(path);
-        if (res.ok) {
-          const data = await res.json();
-          console.log(`[loadLessons] Loaded from ${path}`);
-          return data.lessons || [];
-        }
-        lastError = `${path}: HTTP ${res.status}`;
-      } catch (e) {
-        lastError = `${path}: ${e.message}`;
+    const lessonsUrl = withBase('assets/lessons.json');
+    
+    try {
+      console.log(`[main.js] Fetching lessons from: ${lessonsUrl}`);
+      const res = await fetch(lessonsUrl);
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} when fetching ${lessonsUrl}`);
       }
+      
+      const data = await res.json();
+      console.log(`[main.js] Successfully loaded ${(data.lessons || []).length} lessons`);
+      
+      return data.lessons || [];
+    } catch (err) {
+      console.error('[main.js] Failed to load lessons:', err);
+      throw new Error(`Failed to load lessons from ${lessonsUrl}: ${err.message}`);
     }
-
-    throw new Error(`Failed to load lessons. Last error: ${lastError}`);
   }
 
   async function init() {
     try {
       // Register service worker
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
+        const swUrl = withBase('sw.js');
+        navigator.serviceWorker.register(swUrl).catch((err) => {
+          console.warn('[SW] Registration failed:', err);
+        });
       }
 
       // Load data
@@ -184,14 +206,32 @@
 
       // Initial render
       updateDisplay();
+      
+      // Debug logging
+      if (window.BasePath && window.BasePath.isDebugMode()) {
+        console.log('[main.js] Initialization complete');
+        console.log('[main.js] Total lessons:', state.allLessons.length);
+        console.log('[main.js] Completed lessons:', state.completedLessons.size);
+      }
     } catch (err) {
-      console.error('[Init Error]', err);
+      console.error('[main.js Init Error]', err);
       const grid = document.getElementById('lessons-grid');
       if (grid) {
+        const errorDetails = window.BasePath ? `
+          <details style="margin-top:12px;">
+            <summary style="cursor:pointer;color:#666;">Technical details</summary>
+            <pre style="margin-top:8px;font-size:0.85em;color:#666;white-space:pre-wrap;">Error: ${err.message}
+Base Path: ${window.BasePath.getBase() || '(root)'}
+Current Location: ${window.location.href}
+Add ?debug=1 to URL for more details.</pre>
+          </details>
+        ` : '';
+        
         grid.innerHTML = `
           <div class="no-lessons">
             <p class="no-lessons-title">Error loading lessons</p>
             <p class="no-lessons-text">Please refresh the page or check your connection.</p>
+            ${errorDetails}
           </div>
         `;
       }
