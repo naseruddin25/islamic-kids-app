@@ -19,18 +19,24 @@
       return;
     }
 
+    let scrollY = 0;
+
     const openDrawer = () => {
+      scrollY = window.scrollY || window.pageYOffset;
       drawer.classList.add('open');
       hamburger.classList.add('open');
       hamburger.setAttribute('aria-expanded', 'true');
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('nav-open');
+      document.body.style.top = `-${scrollY}px`;
     };
 
     const closeDrawer = () => {
       drawer.classList.remove('open');
       hamburger.classList.remove('open');
       hamburger.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
+      document.body.classList.remove('nav-open');
+      document.body.style.top = '';
+      window.scrollTo(0, scrollY);
     };
 
     // Open drawer
