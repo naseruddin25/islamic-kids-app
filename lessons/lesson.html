@@ -6,14 +6,11 @@
   <meta name="site-base" content="/islamic-kids-app">
   <title>Lesson | Teen Deen</title>
   <link rel="stylesheet" href="../assets/styles.css">
-  <link rel="stylesheet" href="../assets/tts.css">
-  <link rel="stylesheet" href="../assets/certificate.css">
   <link rel="stylesheet" href="../assets/lesson-01-quiz.css">
   <link rel="manifest" href="../manifest.webmanifest">
   <meta name="theme-color" content="#ffd166">
   <link rel="apple-touch-icon" href="../assets/icon.svg">
   <script src="../assets/base-path.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body data-page="lesson">
   <header class="site-header">
@@ -42,18 +39,21 @@
       </div>
     </section>
 
+    <!-- READ ALOUD CONTROLS (inserted by tts.js) -->
+    <div id="tts-container"></div>
+
     <!-- LESSON CONTENT -->
     <section class="content-section">
       <div class="card">
         <h2 style="margin-top: 0;">Overview</h2>
-        <div id="lesson-body" style="font-size: var(--text-base); line-height: 1.6; color: var(--color-text);">
+        <div id="lesson-body" class="lesson-content" style="font-size: var(--text-base); line-height: 1.6; color: var(--color-text);">
           <p>Loading content…</p>
         </div>
         <div id="lesson-tags" class="chipbar-container" style="margin-top: 24px; gap: 8px; display: flex; flex-wrap: wrap;"></div>
       </div>
     </section>
 
-    <!-- QUIZ SECTION (REPLACED BY INTERACTIVE SCRIPT FOR LESSON-01) -->
+    <!-- QUIZ SECTION -->
     <section class="content-section" id="quiz-section" style="display: none;">
       <div class="section-header">
         <h2 class="section-title">Check Your Understanding</h2>
@@ -68,7 +68,8 @@
       </div>
     </section>
 
-    <!-- CERTIFICATE PANEL WILL BE INSERTED HERE BY certificate.js -->
+    <!-- CERTIFICATE CONTAINER (populated by certificate.js) -->
+    <div id="certificate-container"></div>
 
     <!-- KEY TAKEAWAYS -->
     <section class="content-section">
@@ -79,22 +80,6 @@
         <ul id="lesson-points" style="margin: 0; padding-left: 24px; line-height: 1.8;"></ul>
       </div>
     </section>
-
-    <!-- SHARE RESULTS (DEPRECATED - MOVED TO INTERACTIVE SCRIPT) -->
-    <section class="content-section" style="display: none;">
-      <div class="section-header">
-        <h2 class="section-title">Share Your Progress</h2>
-      </div>
-      <div class="card">
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <button id="btn-copy" class="btn-inline">Copy Results</button>
-          <button id="btn-email" class="btn-inline">Email Results</button>
-          <button id="btn-sms" class="btn-inline hidden">Text Results</button>
-          <button id="btn-share" class="btn-inline hidden">Share</button>
-        </div>
-        <a id="btn-back" href="./" class="cta-btn" style="margin-top: 24px; display: inline-block;">Back to Lessons</a>
-      </div>
-    </section>
   </main>
 
   <footer class="site-footer">
@@ -103,9 +88,12 @@
     </div>
   </footer>
 
-  <script src="../assets/app.js" defer></script>
-  <script src="../assets/tts.js" defer></script>
-  <script src="../assets/certificate.js" defer></script>
+  <!-- Core Scripts -->
+  <script src="../assets/progress.js"></script>
+  <script src="../assets/confetti.js"></script>
+  <script src="../assets/tts.js"></script>
+  <script src="../assets/certificate.js"></script>
+  <script src="../assets/app.js"></script>
   <script src="../assets/lesson-01-interactive.js" defer></script>
 </body>
 </html>
