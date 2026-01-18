@@ -14,60 +14,87 @@
 <body data-page="lesson">
   <header class="site-header">
     <nav class="navbar">
-      <div class="brand">Teen Deen</div>
-      <div class="nav-links">
-        <a href="../">Home</a>
-        <a href="./">Lessons</a>
-        <a href="../parents.html">Parent Guide</a>
-        <a href="../progress.html">Progress</a>
+      <div class="navbar-brand">Teen Deen</div>
+      <nav class="navbar-nav" aria-label="Primary navigation">
+        <a href="../" class="nav-pill">Discover</a>
+        <a href="./" class="nav-pill">Lessons</a>
+        <a href="./?mode=quiz" class="nav-pill">Quizzes</a>
+        <a href="../parents.html" class="nav-pill">Parents</a>
+        <a href="../progress.html" class="nav-pill">Progress</a>
+      </nav>
+      <div class="navbar-right">
+        <a href="./" class="cta-btn">Back to Lessons</a>
       </div>
     </nav>
   </header>
 
-  <main class="page">
-    <section class="section">
-      <div class="scene-mini">
-        <div class="stack stack-narrow">
-          <div class="pill-label">Lesson</div>
-          <h1 id="lesson-title" class="display-title display-sm text-left no-margin">Loading lesson…</h1>
-          <p id="lesson-meta" class="subhead text-left no-margin"></p>
+  <main>
+    <!-- LESSON HEADER -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="pill-label" style="margin-bottom: 12px;">Lesson</div>
+        <h1 class="hero-title" id="lesson-title" style="font-size: 2.5rem; margin-bottom: 8px;">Loading lesson…</h1>
+        <p class="hero-subtitle" id="lesson-meta" style="margin-top: 0;"></p>
+      </div>
+    </section>
+
+    <!-- LESSON CONTENT -->
+    <section class="content-section">
+      <div class="card">
+        <h2 style="margin-top: 0;">Overview</h2>
+        <div id="lesson-body" style="font-size: var(--text-base); line-height: 1.6; color: var(--color-text);">
+          <p>Loading content…</p>
+        </div>
+        <div id="lesson-tags" class="chipbar-container" style="margin-top: 24px; gap: 8px; display: flex; flex-wrap: wrap;"></div>
+      </div>
+    </section>
+
+    <!-- QUIZ SECTION -->
+    <section class="content-section" id="quiz-section" style="display: none;">
+      <div class="section-header">
+        <h2 class="section-title">Check Your Understanding</h2>
+      </div>
+      <div class="card">
+        <div id="quiz-options" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;"></div>
+        <div id="quiz-result" class="hidden" style="padding: 16px; border-radius: var(--radius-md); margin-bottom: 20px; background: var(--color-bg-warm);"></div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button id="quiz-submit" class="cta-btn">Check Answer</button>
+          <button id="quiz-retry" class="btn-inline hidden" style="background: var(--color-surface); border: 1px solid var(--color-border);">Try Again</button>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <article class="lesson-card">
-        <h2 class="no-margin">Overview</h2>
-        <p id="lesson-body" class="small">Loading content…</p>
-        <div id="lesson-tags" class="filter-row"></div>
-      </article>
-
-      <div id="quiz" class="quiz-card hidden">
-        <h4>Check your understanding</h4>
-        <div id="quiz-options" class="quiz-options"></div>
-        <div id="quiz-result" class="quiz-result hidden"></div>
-        <div class="button-row">
-          <button id="quiz-submit" class="btn btn-primary">Check answer</button>
-          <button id="quiz-retry" class="btn btn-secondary hidden">Try again</button>
-        </div>
+    <!-- KEY TAKEAWAYS -->
+    <section class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">Key Takeaways</h2>
       </div>
+      <div class="card">
+        <ul id="lesson-points" style="margin: 0; padding-left: 24px; line-height: 1.8;"></ul>
+      </div>
+    </section>
 
-      <div class="overlay-card">
-        <h4>Key takeaways</h4>
-        <ul id="lesson-points" class="small"></ul>
-        <div class="share-row">
-          <button id="btn-copy" class="btn btn-secondary">Copy Results</button>
-          <button id="btn-email" class="btn">Email Results</button>
-          <button id="btn-sms" class="btn hidden">Text Results</button>
-          <button id="btn-share" class="btn hidden">Share</button>
-          <a id="btn-back" class="btn" href="./">Back to lessons</a>
+    <!-- SHARE RESULTS -->
+    <section class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">Share Your Progress</h2>
+      </div>
+      <div class="card">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button id="btn-copy" class="btn-inline">Copy Results</button>
+          <button id="btn-email" class="btn-inline">Email Results</button>
+          <button id="btn-sms" class="btn-inline hidden">Text Results</button>
+          <button id="btn-share" class="btn-inline hidden">Share</button>
         </div>
+        <a id="btn-back" href="./" class="cta-btn" style="margin-top: 24px; display: inline-block;">Back to Lessons</a>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    Continue learning.
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p>Continue learning and growing in knowledge.</p>
+    </div>
   </footer>
 
   <script src="../assets/app.js" defer></script>

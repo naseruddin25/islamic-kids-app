@@ -110,65 +110,89 @@
     })();
 
     const tagsEl = document.getElementById('lesson-tags');
-    tagsEl.innerHTML = (lesson.tags||[]).map(t => `<span class="chip">${t}</span>`).join('');
+    if (tagsEl) {
+      tagsEl.innerHTML = (lesson.tags||[]).map(t => `<span class="chip">${t}</span>`).join('');
+    }
 
-    // Simple quiz stub
+    // Show and setup quiz
+    const quizSection = document.getElementById('quiz-section');
     const quizEl = document.getElementById('quiz');
     const optionsEl = document.getElementById('quiz-options');
     const resultEl = document.getElementById('quiz-result');
     const submitBtn = document.getElementById('quiz-submit');
     const retryBtn = document.getElementById('quiz-retry');
+    
+    if (quizSection) quizSection.style.display = 'block';
+    
     let quizScore = null; // null until answered
     const totalQuestions = 1;
 
-    quizEl.classList.remove('hidden');
-    optionsEl.innerHTML = [
-      {id:'a', text:'A kind action'},
-      {id:'b', text:'A harmful habit'},
-      {id:'c', text:'A random guess'}
-    ].map((o,i) => `
-      <label>
-        <input type="radio" name="quiz" value="${o.id}">
-        <span>${o.text}</span>
-      </label>`).join('');
-
-    function showResult(ok){
-      resultEl.classList.remove('hidden');
-      resultEl.textContent = ok ? 'Strong understanding. Well done.' : 'Review recommended. Think about the core concepts and try again.';
+    if (optionsEl) {
+      optionsEl.innerHTML = [
+        {id:'a', text:'A kind action'},
+        {id:'b', text:'A harmful habit'},
+        {id:'c', text:'A random guess'}
+      ].map((o,i) => `
+        <label style="display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition-fast);">
+          <input type="radio" name="quiz" value="${o.id}" style="width: 20px; height: 20px; cursor: pointer;">
+          <span style="font-size: var(--text-base);">${o.text}</span>
+        </label>`).join('');
     }
 
-    submitBtn.onclick = () => {
-      const chosen = (document.querySelector('input[name="quiz"]:checked')||{}).value;
-      if(!chosen){ showResult(false); return; }
-      const correct = chosen === 'a';
-      showResult(correct);
-      quizScore = correct ? 1 : 0;
-      retryBtn.classList.toggle('hidden', correct);
-      updateShareButtons();
+    function showResult(ok){
+      if (resultEl) {
+        resultEl.classList.remove('hidden');
+        resultEl.style.display = 'block';
+        resultEl.textContent = ok ? '✓ Correct! Strong understanding. Well done.' : '✗ Review recommended. Think about the core concepts and try again.';
+        resultEl.style.color = ok ? 'var(--color-primary)' : 'var(--color-secondary)';
+      }
+    }
 
-      // Persist progress locally
-      try {
-        const completed = new Set(JSON.parse(localStorage.getItem('completedLessons')||'[]'));
-        completed.add(lesson.id);
-        localStorage.setItem('completedLessons', JSON.stringify(Array.from(completed)));
-        const scores = JSON.parse(localStorage.getItem('lessonScores')||'{}');
-        scores[lesson.id] = { score: quizScore, total: totalQuestions, ts: Date.now() };
-        localStorage.setItem('lessonScores', JSON.stringify(scores));
-      } catch {}
-    };
+    if (submitBtn) {
+      submitBtn.onclick = () => {
+        const chosen = (document.querySelector('input[name="quiz"]:checked')||{}).value;
+        if(!chosen){ showResult(false); return; }
+        const correct = chosen === 'a';
+        showResult(correct);
+        quizScore = correct ? 1 : 0;
+        if (retryBtn) {
+          retryBtn.classList.toggle('hidden', correct);
+          retryBtn.style.display = correct ? 'none' : 'inline-block';
+        }
+        updateShareButtons();
 
-    retryBtn.onclick = () => {
-      resultEl.classList.add('hidden');
-      (document.querySelector('input[name="quiz"]:checked')||{}).checked = false;
-      retryBtn.classList.add('hidden');
-      quizScore = null;
-    };
+        // Persist progress locally
+        try {
+          const completed = new Set(JSON.parse(localStorage.getItem('completedLessons')||'[]'));
+          completed.add(lesson.id);
+          localStorage.setItem('completedLessons', JSON.stringify(Array.from(completed)));
+          const scores = JSON.parse(localStorage.getItem('lessonScores')||'{}');
+          scores[lesson.id] = { score: quizScore, total: totalQuestions, ts: Date.now() };
+          localStorage.setItem('lessonScores', JSON.stringify(scores));
+        } catch {}
+      };
+    }
+
+    if (retryBtn) {
+      retryBtn.onclick = () => {
+        if (resultEl) {
+          resultEl.classList.add('hidden');
+          resultEl.style.display = 'none';
+        }
+        (document.querySelector('input[name="quiz"]:checked')||{}).checked = false;
+        retryBtn.classList.add('hidden');
+        retryBtn.style.display = 'none';
+        quizScore = null;
+      };
+    }
 
     const pointsEl = document.getElementById('lesson-points');
-    pointsEl.innerHTML = `
-      <li>Read carefully and think critically</li>
-      <li>Connect ideas to your daily life</li>
-      <li>Discuss what you learned with someone you trust</li>`;
+    if (pointsEl) {
+      pointsEl.innerHTML = `
+        <li>Read carefully and think critically</li>
+        <li>Connect ideas to your daily life</li>
+        <li>Discuss what you learned with someone you trust</li>`;
+    }
 
     // Share buttons: Copy, Email, SMS, Web Share
     const btnCopy = document.getElementById('btn-copy');
