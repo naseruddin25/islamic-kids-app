@@ -1,10 +1,18 @@
 (function(){
   'use strict';
 
+  // Lesson audio mapping
+  const lessonAudio = {
+    'lesson-01': 'lesson-01-intentions.mp3'
+  };
+
   // Shared quiz module
   const TeenDeenQuiz = {
     async initialize(lesson) {
       const quizSection = document.getElementById('quiz-section');
+      const ctaContainer = document.getElementById('quiz-cta-container');
+      const ctaButton = document.getElementById('quiz-cta-button');
+      const questionsWrapper = document.getElementById('quiz-questions-wrapper');
       const optionsEl = document.getElementById('quiz-options');
       const resultEl = document.getElementById('quiz-result');
       const submitBtn = document.getElementById('quiz-submit');
@@ -39,7 +47,6 @@
       };
 
       updateActions();
-      quizSection.style.display = 'block';
 
       const dataUrl = window.withBase ? window.withBase(`data/quizzes/${lesson.id}.json`) : `data/quizzes/${lesson.id}.json`;
 
@@ -50,16 +57,36 @@
         quizData = await res.json();
       } catch (err) {
         console.warn('[Quiz] No data quiz found for', lesson.id, '-', err.message);
-        renderGenericQuiz(optionsEl, resultEl, submitBtn, retryBtn, lesson, state, updateActions, reviewBtn, backTopBtn);
+        renderGenericQuiz(optionsEl, resultEl, submitBtn, retryBtn, lesson, state, updateActions, reviewBtn, backTopBtn, ctaContainer, ctaButton, questionsWrapper);
         return;
       }
 
+      // Setup CTA reveal
+      setupQuizCTAReveal(ctaContainer, ctaButton, questionsWrapper, { optionsEl, resultEl, submitBtn, retryBtn, reviewBtn, backTopBtn, lesson, quizData, state, updateActions, quizSection });
+      
       // Render data-driven quiz
       renderDataQuiz({ optionsEl, resultEl, submitBtn, retryBtn, reviewBtn, backTopBtn, lesson, quizData, state, updateActions, quizSection });
     }
   };
 
-  function renderGenericQuiz(optionsEl, resultEl, submitBtn, retryBtn, lesson, state, updateActions, reviewBtn, backTopBtn) {
+  function setupQuizCTAReveal(ctaContainer, ctaButton, questionsWrapper, quizContext) {
+    if (!ctaButton || !questionsWrapper) return;
+
+    ctaButton.addEventListener('click', () => {
+      // Hide CTA
+      ctaContainer.style.display = 'none';
+      
+      // Show questions
+      questionsWrapper.style.display = 'block';
+      
+      // Smooth scroll to first question
+      setTimeout(() => {
+        quizContext.optionsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    });
+  }
+
+  function renderGenericQuiz(optionsEl, resultEl, submitBtn, retryBtn, lesson, state, updateActions, reviewBtn, backTopBtn, ctaContainer, ctaButton, questionsWrapper) {
     optionsEl.innerHTML = [
       {id:'a', text:'A kind action'},
       {id:'b', text:'A harmful habit'},
@@ -69,6 +96,17 @@
         <input type="radio" name="quiz" value="${o.id}" style="width: 20px; height: 20px; cursor: pointer; margin: 0; flex-shrink: 0;">
         <span style="font-size: var(--text-base);">${o.text}</span>
       </label>`).join('');
+
+    // Setup CTA reveal for generic quiz
+    if (ctaButton && questionsWrapper) {
+      ctaButton.addEventListener('click', () => {
+        ctaContainer.style.display = 'none';
+        questionsWrapper.style.display = 'block';
+        setTimeout(() => {
+          optionsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      });
+    }
 
     const resetUI = () => {
       state.isSubmitted = false;
