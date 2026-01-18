@@ -19,7 +19,6 @@
       <nav class="navbar-nav" aria-label="Primary navigation">
         <a href="../" class="nav-pill">Discover</a>
         <a href="./" class="nav-pill" aria-current="page">Lessons</a>
-        <a href="./?mode=quiz" class="nav-pill">Quizzes</a>
         <a href="../parents.html" class="nav-pill">Parents</a>
         <a href="../progress.html" class="nav-pill">Progress</a>
       </nav>
@@ -35,6 +34,12 @@
       <div class="hero-content">
         <h1 class="hero-title">All Lessons</h1>
         <p class="hero-subtitle">Explore Islamic concepts at your own pace. Each lesson takes about 5 minutes.</p>
+
+        <!-- MODE TOGGLE -->
+        <div style="margin-top: 16px; display: inline-flex; gap: 8px;">
+          <a href="./" class="btn-inline" id="mode-lessons">Lessons Mode</a>
+          <a href="./?mode=quiz" class="btn-inline" id="mode-quiz">Quiz Mode</a>
+        </div>
 
         <!-- SEARCH BAR -->
         <form class="search-form" role="search">
