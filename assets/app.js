@@ -148,8 +148,10 @@
       tagsEl.innerHTML = (lesson.tags||[]).map(t => `<span class="chip">${t}</span>`).join('');
     }
 
-    // Setup quiz
-    setupQuiz(lesson);
+    // Setup quiz - but give interactive scripts a chance to run first
+    setTimeout(() => {
+      setupQuiz(lesson);
+    }, 100);
 
     // Setup reflection section for lesson-01
     setupReflectionSection(lesson);
@@ -198,11 +200,26 @@
     let totalQuestions = 1;
 
     if (optionsEl) {
+      // Check if lesson-01 interactive script already handled the quiz
       if (lesson.id === 'lesson-01') {
+        // Check if the interactive script has already rendered content
+        if (optionsEl.children.length > 0 && 
+            !optionsEl.innerHTML.includes('Loading interactive quiz')) {
+          console.log('[Quiz] Interactive quiz already rendered for lesson-01');
+          return;
+        }
+        
+        // If not, show a better loading message and let interactive script take over
         totalQuestions = 5;
-        optionsEl.innerHTML = '<p style="color: var(--color-text-muted); font-style: italic;">Loading interactive quiz...</p>';
-        console.log('[Quiz] Rendered placeholder for lesson-01, interactive script will take over');
-        return; // Interactive script will handle lesson-01
+        optionsEl.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--color-text-muted);">
+            <div style="font-size: 2em; margin-bottom: 16px;">📝</div>
+            <p style="font-style: italic; margin-bottom: 8px;">Loading interactive quiz...</p>
+            <p style="font-size: 0.9em;">If this takes more than a few seconds, try refreshing the page.</p>
+          </div>
+        `;
+        console.log('[Quiz] Waiting for interactive script to render lesson-01 quiz');
+        return;
       } else {
         totalQuestions = 1;
         optionsEl.innerHTML = [
