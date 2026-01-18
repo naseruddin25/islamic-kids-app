@@ -13,6 +13,29 @@
     completedLessons: new Set(),
   };
 
+  // Render Start Learning intro idempotently
+  function renderStartLearningIntro() {
+    const host = document.getElementById('start-learning-intro');
+    if (!host) return;
+    host.innerHTML = `
+      <div class="card intro-card">
+        <h2>Start Learning</h2>
+        <p>
+          Welcome to Teen Deen. You're about to start a journey exploring Islamic concepts that are relevant to your life right now. Whether you're curious about faith, identity, relationships, or purpose, these lessons are designed specifically for you.
+        </p>
+        <p>
+          <strong>What to expect:</strong> Each lesson takes about 5 minutes and covers one important concept. You'll find clear explanations, real-world connections, and a simple quiz to check your understanding. There's no pressure—this is about learning at your own pace.
+        </p>
+        <p>
+          <strong>How it works:</strong> Browse lessons by topic or search for something specific. Click any lesson to dive in. Your progress is saved on your device, so you can pick up where you left off anytime.
+        </p>
+        <p>
+          Ready? Pick a lesson below, or explore by category. Let's get started.
+        </p>
+      </div>
+    `;
+  }
+
   // Map lesson tags/categories to chip categories
   const categoryMap = {
     'foundations': ['Foundations of Faith'],
@@ -204,6 +227,12 @@
   }
 
   async function init() {
+    if (window.__teenDeenLessonsInit) {
+      console.count('[TeenDeen] initLessonsPage');
+      return;
+    }
+    window.__teenDeenLessonsInit = true;
+    console.count('[TeenDeen] initLessonsPage');
     console.log('[TeenDeen] main.js loaded on', location.pathname);
     
     // Check for quiz mode via URL parameter
@@ -246,6 +275,9 @@
           console.warn('[SW] Registration failed:', err);
         });
       }
+
+      // Render static intro once
+      renderStartLearningIntro();
 
       // Load data
       state.allLessons = await loadLessons();
