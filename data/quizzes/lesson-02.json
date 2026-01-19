@@ -1,0 +1,67 @@
+[
+  {
+    "id": "q1",
+    "type": "multiple-choice",
+    "question": "What did the Prophet Muhammad ﷺ say about seeking knowledge?",
+    "choices": [
+      "Knowledge is only for scholars and adults",
+      "Knowledge is optional for Muslims",
+      "Seeking knowledge is obligatory upon every Muslim",
+      "Only people who attend formal school need knowledge"
+    ],
+    "correctIndex": 2,
+    "explanation": "The Prophet ﷺ clearly taught that seeking knowledge is an obligation for every Muslim—not just for scholars, not just for adults, and not just for those in formal school. This obligation applies to all Muslims who have reached maturity."
+  },
+  {
+    "id": "q2",
+    "type": "multiple-choice",
+    "question": "What did Sufyān al-Thawrī mean when he explained the hadith about seeking knowledge?",
+    "choices": [
+      "Only advanced Islamic science is required",
+      "It is that knowledge which the servant has no excuse to be ignorant of—basic knowledge every Muslim must know",
+      "Knowledge means reading books all day",
+      "Only children are required to learn"
+    ],
+    "correctIndex": 1,
+    "explanation": "Sufyān al-Thawrī clarified that the obligation includes fundamental knowledge that no Muslim can excuse themselves from—such as basic belief, prayer, and knowing what is halal and haram in daily life. It's not about becoming a scholar, but about knowing the essentials."
+  },
+  {
+    "id": "q3",
+    "type": "multiple-choice",
+    "question": "Why did Ibn Bāz emphasize that every accountable Muslim must learn the basics of religion?",
+    "choices": [
+      "To make school easier for students",
+      "To become a scholar like him",
+      "Because you were created to worship Allah correctly, and worship requires knowledge to know what Allah requires",
+      "Just to pass a test"
+    ],
+    "correctIndex": 2,
+    "explanation": "Ibn Bāz explained that Allah created us to worship Him, but we cannot worship Him correctly without understanding His requirements. Knowledge is the foundation for proper worship, making it essential for every Muslim—male or female, teenager or adult."
+  },
+  {
+    "id": "q4",
+    "type": "multiple-choice",
+    "question": "What does 'individual obligation' (Fardh ʿAyn) mean when it comes to seeking knowledge?",
+    "choices": [
+      "It's your parents' responsibility, not yours",
+      "It's something you can skip if you're busy",
+      "It's your personal responsibility—no one else can learn it for you",
+      "It only applies to boys, not girls"
+    ],
+    "correctIndex": 2,
+    "explanation": "An individual obligation means it is your personal responsibility. You cannot delegate this to someone else. You must personally learn the basics of belief, prayer, worship, and distinguishing halal from haram. No one can do this learning for you."
+  },
+  {
+    "id": "q5",
+    "type": "multiple-choice",
+    "question": "What did the Prophet ﷺ promise about the reward for seeking knowledge?",
+    "choices": [
+      "You will become famous and rich",
+      "You will never face any difficulties",
+      "Allah will make easy for him a path to Paradise",
+      "You will never need to pray"
+    ],
+    "correctIndex": 2,
+    "explanation": "The Prophet ﷺ taught that whoever takes a path seeking knowledge, Allah will ease for them a path to Paradise. Seeking knowledge is an act of worship that brings Allah's pleasure, raises your status, brings forgiveness, and ultimately leads to success in this life and the next."
+  }
+]
