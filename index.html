@@ -20,10 +20,11 @@
     <nav class="navbar">
       <div class="navbar-brand">Teen Deen</div>
       <nav class="navbar-nav" aria-label="Primary navigation">
-        <a href="./" class="nav-pill" aria-current="page">Discover</a>
-        <a href="lessons/" class="nav-pill">Lessons</a>
+        <a href="./" class="nav-pill" aria-current="page">Home</a>
+        <a href="lessons/" class="nav-pill">Short Lessons</a>
+        <a href="teen-issues.html" class="nav-pill">Teen Issues</a>
         <a href="parents.html" class="nav-pill">Parents</a>
-        <a href="progress.html" class="nav-pill">Progress</a>
+        <a href="about.html" class="nav-pill">About</a>
       </nav>
       <button class="navbar-hamburger" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navbar-drawer-menu">
         <span>
@@ -43,10 +44,11 @@
           <button class="navbar-drawer-close" aria-label="Close menu">✕</button>
         </div>
         <nav class="navbar-drawer-nav" aria-label="Primary navigation">
-          <a href="./" class="nav-pill" aria-current="page">Discover</a>
-          <a href="lessons/" class="nav-pill">Lessons</a>
+          <a href="./" class="nav-pill" aria-current="page">Home</a>
+          <a href="lessons/" class="nav-pill">Short Lessons</a>
+          <a href="teen-issues.html" class="nav-pill">Teen Issues</a>
           <a href="parents.html" class="nav-pill">Parents</a>
-          <a href="progress.html" class="nav-pill">Progress</a>
+          <a href="about.html" class="nav-pill">About</a>
         </nav>
       </div>
     </div>
@@ -56,89 +58,101 @@
     <!-- HERO SECTION -->
     <section class="hero">
       <div class="hero-content">
-        <h1 class="hero-title">Learn your Deen</h1>
-        <p class="hero-subtitle">Short, focused Islamic lessons designed for teens. Think critically. Track progress.</p>
+        <h1 class="hero-title">Teen Deen</h1>
+        <p class="hero-subtitle">Short Islamic lessons for real life — built for teenagers.</p>
         
-        <!-- SEARCH BAR -->
-        <form class="search-form" role="search">
-          <div class="search-input-wrapper">
-            <span class="search-icon">🔍</span>
-            <input 
-              type="search" 
-              class="search-input" 
-              id="hero-search"
-              placeholder="Search lessons by topic or number"
-              autocomplete="off"
-              aria-label="Search lessons"
-            >
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- CATEGORY CHIPS -->
-    <section class="chipbar">
-      <div class="container-narrow">
-        <div class="chipbar-container" id="chip-container" role="group" aria-label="Filter by category">
-          <button class="chip active" data-category="all">All Topics</button>
-          <button class="chip" data-category="foundations">Belief</button>
-          <button class="chip" data-category="character">Character</button>
-          <button class="chip" data-category="worship">Worship</button>
-          <button class="chip" data-category="identity">Identity</button>
-          <button class="chip" data-category="social">Social Life</button>
-          <button class="chip" data-category="purpose">Purpose</button>
+        <!-- PRIMARY CTA BUTTONS -->
+        <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; justify-content: center;">
+          <a href="lessons/" class="cta-btn" style="text-decoration: none;">Start a Short Lesson</a>
+          <a href="teen-issues.html" class="cta-btn" style="text-decoration: none; background: var(--color-accent);">Explore Teen Issues</a>
         </div>
+        
+        <!-- SMALL LINK FOR PARENTS -->
+        <p style="margin-top: 16px; font-size: 0.875rem;">
+          <a href="parents.html" style="color: var(--color-text-muted); text-decoration: underline;">For Parents</a>
+        </p>
       </div>
     </section>
 
-    <!-- LESSONS GRID -->
-    <section class="content-section" id="lessons-section">
+    <!-- WHAT THIS SITE IS ABOUT -->
+    <section class="content-section">
       <div class="section-header">
-        <h2 class="section-title">Lessons</h2>
-        <div class="status-text" id="filter-status" aria-live="polite"></div>
+        <h2 class="section-title">What This Site Is About</h2>
       </div>
-      <div class="cards-grid" id="lessons-grid" role="region" aria-label="Lessons" aria-live="polite">
-        <div class="no-lessons">
-          <p class="no-lessons-title">Loading lessons...</p>
-          <p class="no-lessons-text">This will just take a moment.</p>
+      <p style="max-width: 700px; margin: 0 auto; text-align: center; font-size: 1.0625rem; line-height: 1.7;">
+        Islam isn't just something you do on Fridays. It's how you think, choose, and live every day. Teen Deen gives you short lessons you can finish in about 5 minutes — with a quick quiz to help you remember what matters.
+      </p>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">How It Works</h2>
+      </div>
+      <div class="cards-grid">
+        <div class="card">
+          <h3 class="text-primary">1. Pick a Short Lesson</h3>
+          <p class="card-description">Each lesson takes about 5 minutes. Read, reflect, and think.</p>
         </div>
+        <div class="card">
+          <h3 class="text-primary">2. Take the Quiz</h3>
+          <p class="card-description">Quick self-check to help you remember what matters.</p>
+        </div>
+        <div class="card">
+          <h3 class="text-primary">3. Share (Optional)</h3>
+          <p class="card-description">Share your results with parents if you want to discuss what you learned.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TWO PATHS -->
+    <section class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">Choose Your Path</h2>
+      </div>
+      <div class="cards-grid">
+        <div class="card">
+          <h3>📚 Short Lessons</h3>
+          <p class="card-description">Foundations, worship basics, character — the essential knowledge every Muslim needs.</p>
+          <a href="lessons/" class="cta-btn" style="margin-top: 16px; text-decoration: none; display: inline-block;">Go to Short Lessons</a>
+        </div>
+        <div class="card">
+          <h3>💬 Teen Issues</h3>
+          <p class="card-description">Real topics teens face: pressure, social media, doubts, anger, anxiety, and more.</p>
+          <a href="teen-issues.html" class="cta-btn" style="margin-top: 16px; text-decoration: none; display: inline-block; background: var(--color-accent);">Go to Teen Issues</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUICK LINKS / FEATURED TOPICS -->
+    <section class="content-section">
+      <div class="section-header">
+        <h2 class="section-title">Quick Links</h2>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; max-width: 700px; margin: 0 auto;">
+        <a href="teen-issues.html#faith-doubt" class="chip" style="text-decoration: none;">Faith & Doubt</a>
+        <a href="teen-issues.html#friends-pressure" class="chip" style="text-decoration: none;">Friends & Pressure</a>
+        <a href="teen-issues.html#social-media" class="chip" style="text-decoration: none;">Social Media</a>
+        <a href="teen-issues.html#anger-anxiety" class="chip" style="text-decoration: none;">Anger & Anxiety</a>
+        <a href="teen-issues.html#school-discipline" class="chip" style="text-decoration: none;">School & Discipline</a>
+        <a href="teen-issues.html#intentions" class="chip" style="text-decoration: none;">Intentions</a>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="footer-content">
-      <p>Built for teens seeking knowledge. Privacy-first. Ad-free. No tracking.</p>
+      <p>
+        <a href="lessons/" style="color: inherit; margin: 0 8px;">Short Lessons</a> • 
+        <a href="teen-issues.html" style="color: inherit; margin: 0 8px;">Teen Issues</a> • 
+        <a href="parents.html" style="color: inherit; margin: 0 8px;">Parents</a> • 
+        <a href="about.html" style="color: inherit; margin: 0 8px;">About</a>
+      </p>
+      <p style="margin-top: 8px; font-size: 0.875rem; opacity: 0.7;">Privacy-first. Ad-free. No tracking.</p>
     </div>
   </footer>
 
-  <script src="assets/progress.js"></script>
-  <script src="assets/confetti.js"></script>
-  <script src="assets/app.js"></script>
   <script src="assets/mobile-nav.js"></script>
-  <script src="assets/main.js" defer></script>
-  <script>
-    // Update progress stats on home page
-    window.addEventListener('DOMContentLoaded', () => {
-      if (window.TeenDeenProgress) {
-        const stats = window.TeenDeenProgress.getStats();
-        const progressCount = document.getElementById('progress-count');
-        const xpCount = document.getElementById('xp-count');
-        const streakCount = document.getElementById('streak-count');
-        
-        if (progressCount) progressCount.textContent = stats.completedCount;
-        if (xpCount) xpCount.textContent = stats.xp;
-        if (streakCount) streakCount.textContent = stats.streak.current;
-      }
-
-      // Start button handler
-      const startBtn = document.getElementById('start-btn');
-      if (startBtn) {
-        startBtn.addEventListener('click', () => {
-          window.location.href = window.withBase ? window.withBase('lessons/') : 'lessons/';
-        });
-      }
-    });
-  </script>
+  <script src="assets/app.js"></script>
 </body>
 </html>
