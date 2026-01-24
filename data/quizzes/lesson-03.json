@@ -1,0 +1,71 @@
+{
+  "lessonId": "lesson-03",
+  "title": "Lesson 3 Quiz",
+  "questions": [
+    {
+      "id": "l3-q1",
+      "type": "multiple-choice",
+      "question": "In this lesson, belief is compared to:",
+      "choices": [
+        "The paint on a house",
+        "A house's foundation and pillars",
+        "A roof",
+        "A window"
+      ],
+      "correctIndex": 1,
+      "explanation": "Belief supports actions the way a foundation and pillars support a house."
+    },
+    {
+      "id": "l3-q2",
+      "type": "multiple-choice",
+      "question": "What happens if belief is weak or incorrect?",
+      "choices": [
+        "Actions are always accepted",
+        "Actions may not be accepted",
+        "Only fasting matters",
+        "Nothing changes"
+      ],
+      "correctIndex": 1,
+      "explanation": "Actions must be built on correct belief to be accepted."
+    },
+    {
+      "id": "l3-q3",
+      "type": "multiple-choice",
+      "question": "According to Surah al-Mā'idah 5:5, what happens when faith is rejected?",
+      "choices": [
+        "Only prayer is affected",
+        "Deeds can become worthless",
+        "Charity still counts",
+        "Nothing happens"
+      ],
+      "correctIndex": 1,
+      "explanation": "The verse teaches that rejecting faith makes deeds worthless in the Hereafter."
+    },
+    {
+      "id": "l3-q4",
+      "type": "multiple-choice",
+      "question": "Where must correct Islamic belief come from?",
+      "choices": [
+        "Personal opinions",
+        "Popular culture",
+        "Qur'an and Sunnah",
+        "Social media"
+      ],
+      "correctIndex": 2,
+      "explanation": "The lesson teaches that belief must come from revelation, not guesses."
+    },
+    {
+      "id": "l3-q5",
+      "type": "multiple-choice",
+      "question": "What is the key takeaway of Lesson 3?",
+      "choices": [
+        "Actions matter more than belief",
+        "Belief is optional",
+        "Correct belief comes first and actions are built on it",
+        "Copy others without understanding"
+      ],
+      "correctIndex": 2,
+      "explanation": "The lesson ends by teaching that belief is the foundation of Islam."
+    }
+  ]
+}
