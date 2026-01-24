@@ -71,6 +71,7 @@
     <section class="content-section">
       <div class="section-header">
         <h2 class="section-title">Overview</h2>
+        <button id="share-progress-btn" class="cta-btn" style="font-size: 0.95rem;">Share Progress</button>
       </div>
       <div class="cards-grid">
         <div class="card" style="background: linear-gradient(135deg, #fff7ec 0%, #ffefd5 100%); border-left: 4px solid var(--color-primary);">
@@ -91,6 +92,21 @@
           <p style="margin: 0; font-size: 3em; font-weight: 700; color: #118ab2;" id="stat-completed">0</p>
           <p style="margin: 8px 0 0 0; font-size: 0.9em; color: var(--color-text-muted);">lessons</p>
         </div>
+      </div>
+      
+      <!-- SHARE MODAL (hidden by default) -->
+      <div id="share-modal" style="display: none; margin-top: 24px; padding: 20px; background: var(--color-surface); border: 2px solid var(--color-primary); border-radius: var(--radius-lg);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 1.25rem;">Share Your Progress</h3>
+          <button id="close-share-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 4px 8px; color: var(--color-text-muted);" aria-label="Close">×</button>
+        </div>
+        <p id="share-message" style="margin: 16px 0; padding: 16px; background: white; border-radius: var(--radius-md); font-size: 0.95rem; line-height: 1.6; color: var(--color-text);"></p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
+          <button id="copy-progress-btn" class="btn-inline" style="flex: 1; min-width: 140px;">📋 Copy Message</button>
+          <a id="sms-progress-link" href="#" class="btn-inline" style="flex: 1; min-width: 140px; text-decoration: none;">💬 Text (SMS)</a>
+          <a id="email-progress-link" href="#" class="btn-inline" style="flex: 1; min-width: 140px; text-decoration: none;">✉️ Email</a>
+        </div>
+        <p id="copy-feedback" style="margin-top: 12px; font-size: 0.875rem; color: var(--color-accent); text-align: center; display: none;">✓ Copied to clipboard!</p>
       </div>
     </section>
 
@@ -226,6 +242,108 @@
             window.TeenDeenConfetti.setEnabled(e.target.checked);
           });
         }
+
+        // Share Progress functionality
+        const shareBtn = document.getElementById('share-progress-btn');
+        const shareModal = document.getElementById('share-modal');
+        const closeModal = document.getElementById('close-share-modal');
+        const copyBtn = document.getElementById('copy-progress-btn');
+        const shareMessageEl = document.getElementById('share-message');
+        const copyFeedback = document.getElementById('copy-feedback');
+        const smsLink = document.getElementById('sms-progress-link');
+        const emailLink = document.getElementById('email-progress-link');
+
+        function generateShareMessage() {
+          const stats = window.TeenDeenProgress ? window.TeenDeenProgress.getStats() : {
+            completedCount: 0,
+            xp: 0,
+            streak: { current: 0 }
+          };
+
+          if (stats.completedCount === 0) {
+            return "I'm starting Teen Deen and working through lessons to strengthen my faith and character. 🌟";
+          }
+
+          const parts = [];
+          parts.push("📚 Teen Deen Progress Update");
+          parts.push("");
+          parts.push(`✓ ${stats.completedCount} lesson${stats.completedCount !== 1 ? 's' : ''} completed`);
+          parts.push(`⭐ ${stats.xp} XP earned`);
+          if (stats.streak.current > 0) {
+            parts.push(`🔥 ${stats.streak.current} day streak`);
+          }
+          parts.push("");
+          parts.push("I've been learning and making progress. 🌟");
+          
+          return parts.join("\n");
+        }
+
+        shareBtn.addEventListener('click', async () => {
+          const message = generateShareMessage();
+          shareMessageEl.textContent = message;
+
+          // Try Web Share API first
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: 'Teen Deen Progress',
+                text: message,
+                url: window.location.origin + (window.withBase ? window.withBase('') : '/islamic-kids-app/')
+              });
+              return; // Successfully shared, exit
+            } catch (err) {
+              if (err.name !== 'AbortError') {
+                console.log('Share API failed, showing fallback:', err);
+              } else {
+                return; // User cancelled
+              }
+            }
+          }
+
+          // Fallback: show modal
+          shareModal.style.display = 'block';
+          copyFeedback.style.display = 'none';
+
+          // Setup SMS link
+          const smsBody = encodeURIComponent(message);
+          smsLink.href = `sms:?&body=${smsBody}`;
+
+          // Setup Email link
+          const emailSubject = encodeURIComponent('Teen Deen Progress Update');
+          const emailBody = encodeURIComponent(message);
+          emailLink.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
+        });
+
+        closeModal.addEventListener('click', () => {
+          shareModal.style.display = 'none';
+          copyFeedback.style.display = 'none';
+        });
+
+        copyBtn.addEventListener('click', async () => {
+          const message = shareMessageEl.textContent;
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(message);
+            } else {
+              // Fallback for older browsers
+              const textarea = document.createElement('textarea');
+              textarea.value = message;
+              textarea.style.position = 'fixed';
+              textarea.style.opacity = '0';
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textarea);
+            }
+            copyFeedback.style.display = 'block';
+            setTimeout(() => {
+              copyFeedback.style.display = 'none';
+            }, 3000);
+          } catch (err) {
+            console.error('Copy failed:', err);
+            alert('Could not copy to clipboard. Please select and copy the text manually.');
+          }
+        });
       });
     })();
   </script>
