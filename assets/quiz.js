@@ -3,7 +3,8 @@
 
   // Lesson audio mapping
   const lessonAudio = {
-    'lesson-01': 'lesson-01-intentions.mp3'
+    'lesson-01': 'lesson-01-intentions.mp3',
+    'lesson-03': 'lesson-03-islamic-belief-male.mp3'
   };
 
   // Shared quiz module

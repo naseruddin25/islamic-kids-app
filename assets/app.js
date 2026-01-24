@@ -27,6 +27,10 @@
     'lesson-02': {
       male: 'lesson-02-importance-of-knowlege-male.mp3',
       female: 'lesson-02-importance-of-knowlege-female.mp3'
+    },
+    'lesson-03': {
+      male: 'lesson-03-islamic-belief-male.mp3',
+      female: 'lesson-03-islamic-belief-male.mp3'
     }
     // Add more lessons here as needed
   };
