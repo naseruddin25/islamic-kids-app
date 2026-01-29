@@ -109,61 +109,6 @@
     };
   }
 
-  function populateTranscript(htmlContent) {
-    const transcriptContent = document.getElementById('transcript-content');
-    if (!transcriptContent) {
-      console.log('[Transcript] Transcript container not found');
-      return;
-    }
-
-    // Create a temporary div to parse the HTML
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-
-    // Remove sections we don't want in transcript (e.g., quizzes, reflection sections)
-    const elementsToRemove = tempDiv.querySelectorAll('.quiz-container, textarea, button, select, input');
-    elementsToRemove.forEach(el => el.remove());
-
-    // Extract text content while preserving structure
-    const sections = tempDiv.querySelectorAll('section, .lesson-revelation');
-    
-    if (sections.length === 0) {
-      // Fallback: use all text content
-      transcriptContent.innerHTML = `<p>${tempDiv.textContent.trim().replace(/\s+/g, ' ')}</p>`;
-    } else {
-      let transcriptHTML = '';
-      sections.forEach(section => {
-        // Skip reflection sections
-        if (section.textContent.toLowerCase().includes('reflection (not graded)')) {
-          return;
-        }
-        
-        const heading = section.querySelector('h2, h3');
-        const headingText = heading ? heading.textContent.trim() : '';
-        const paragraphs = Array.from(section.querySelectorAll('p, li'));
-        
-        if (headingText) {
-          transcriptHTML += `<p style="font-weight: 600; margin-top: 16px; margin-bottom: 8px;">${headingText}</p>`;
-        }
-        
-        paragraphs.forEach(p => {
-          const text = p.textContent.trim();
-          if (text && text.length > 3 && !text.includes('Your thoughts') && !text.includes('optional, stays on your device')) {
-            transcriptHTML += `<p style="margin-bottom: 8px;">${text}</p>`;
-          }
-        });
-      });
-      
-      if (transcriptHTML) {
-        transcriptContent.innerHTML = transcriptHTML;
-      } else {
-        transcriptContent.innerHTML = '<p style="font-style: italic;">No transcript available for this lesson.</p>';
-      }
-    }
-    
-    console.log('[Transcript] Populated transcript content');
-  }
-
   function renderAudioPlayer(lessonId) {
     const audioConfig = lessonAudio[lessonId];
     const audioContainer = document.getElementById('audio-player-container');
@@ -205,14 +150,6 @@
         
         <div id="audio-error" class="audio-error"></div>
         <a id="audio-fallback-link" class="audio-fallback" href="" target="_blank" rel="noopener">Open audio in new tab</a>
-        
-        <!-- Audio Transcript -->
-        <details id="audio-transcript" style="margin-top: 16px; padding: 16px; background: var(--color-surface, #fff); border: 1px solid var(--color-border, #e0e0e0); border-radius: var(--radius-md, 8px);">
-          <summary style="cursor: pointer; font-weight: 600; color: var(--color-primary, #ffd166); user-select: none;">📄 View Transcript</summary>
-          <div id="transcript-content" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border, #e0e0e0); line-height: 1.6; color: var(--color-text-muted, #666); font-size: 0.95em;">
-            <p style="font-style: italic;">Transcript will be loaded when the lesson content is available.</p>
-          </div>
-        </details>
       </div>
     `;
 
@@ -400,9 +337,6 @@
           const html = await res.text();
           if (html && html.trim().length > 0) {
             document.getElementById('lesson-body').innerHTML = html;
-            
-            // Populate transcript with lesson content
-            populateTranscript(html);
           } else {
             throw new Error('Empty content received');
           }
