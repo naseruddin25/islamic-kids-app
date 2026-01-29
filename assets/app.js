@@ -388,6 +388,9 @@
           <li>Allah looks at your heart (intention) before your actions.</li>
           <li>Riya' (showing off) can destroy deeds—keep your worship sincere.</li>
           <li>Pause and ask: "Who am I really doing this for?"</li>`;
+      } else if (lesson.id === 'lesson-03') {
+        // Lesson 03 has its own comprehensive Key Takeaway section in the content
+        pointsEl.closest('.content-section').style.display = 'none';
       } else {
         pointsEl.innerHTML = `
           <li>Read carefully and think critically</li>
