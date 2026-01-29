@@ -3,7 +3,7 @@
   "lessons": [
     { "id": "lesson-01", "number": 1, "title": "Intentions: Why You Do What You Do", "minutes": 5, "tags": ["Belief / Character"] },
     { "id": "lesson-02", "number": 2, "title": "The Importance of Seeking Knowledge", "minutes": 5, "tags": ["Foundations of Faith"] },
-    { "id": "lesson-03", "number": 3, "title": "Understanding the Correct Islamic Belief (Aqidah)", "minutes": 5, "tags": ["Foundations of Faith"] },
+    { "id": "lesson-03", "number": 3, "title": "Islamic Belief (Aqeedah) — The Foundation of Islam", "minutes": 5, "tags": ["Foundations of Faith"] },
     { "id": "lesson-04", "number": 4, "title": "Tawhid: Knowing Allah and His Oneness", "minutes": 5, "tags": ["Foundations of Faith"] },
     { "id": "lesson-05", "number": 5, "title": "Shirk: What It Is and Why It's Dangerous", "minutes": 5, "tags": ["Foundations of Faith"] },
     { "id": "lesson-06", "number": 6, "title": "The Pillars of Islam (Simple Overview)", "minutes": 5, "tags": ["Pillars of Islam & Iman"] },

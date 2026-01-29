@@ -5,67 +5,67 @@
     {
       "id": "l3-q1",
       "type": "multiple-choice",
-      "question": "In this lesson, belief is compared to:",
+      "question": "What does Aqeedah mean in English?",
       "choices": [
-        "The paint on a house",
-        "A house's foundation and pillars",
-        "A roof",
-        "A window"
+        "Islamic actions",
+        "Islamic culture",
+        "Islamic belief",
+        "Islamic history"
       ],
-      "correctIndex": 1,
-      "explanation": "Belief supports actions the way a foundation and pillars support a house."
+      "correctIndex": 2,
+      "explanation": "Aqeedah is the Arabic word for Islamic belief — what you believe in your heart about Islam with certainty."
     },
     {
       "id": "l3-q2",
       "type": "multiple-choice",
-      "question": "What happens if belief is weak or incorrect?",
+      "question": "Why is belief more important than actions?",
       "choices": [
-        "Actions are always accepted",
-        "Actions may not be accepted",
-        "Only fasting matters",
-        "Nothing changes"
+        "Actions are optional",
+        "Belief makes actions accepted",
+        "Actions matter more than belief",
+        "Only scholars need belief"
       ],
       "correctIndex": 1,
-      "explanation": "Actions must be built on correct belief to be accepted."
+      "explanation": "If a person's Islamic belief is correct, their actions are accepted. If belief is not sound, actions are not accepted — even if they look good."
     },
     {
       "id": "l3-q3",
       "type": "multiple-choice",
-      "question": "According to Surah al-Mā'idah 5:5, what happens when faith is rejected?",
+      "question": "What happens if a person's belief is corrupted?",
       "choices": [
-        "Only prayer is affected",
-        "Deeds can become worthless",
-        "Charity still counts",
-        "Nothing happens"
+        "Actions are still accepted",
+        "Only some actions count",
+        "Actions lose their value",
+        "Nothing changes"
       ],
-      "correctIndex": 1,
-      "explanation": "The verse teaches that rejecting faith makes deeds worthless in the Hereafter."
+      "correctIndex": 2,
+      "explanation": "When belief becomes corrupted, deeds are wasted and worship is rejected. The Qur'an teaches that rejecting faith makes deeds worthless."
     },
     {
       "id": "l3-q4",
       "type": "multiple-choice",
-      "question": "Where must correct Islamic belief come from?",
+      "question": "Where does correct Islamic belief come from?",
       "choices": [
-        "Personal opinions",
-        "Popular culture",
-        "Qur'an and Sunnah",
-        "Social media"
+        "Culture and traditions",
+        "Friends and social media",
+        "Feelings and opinions",
+        "The Qur'an and the Sunnah"
       ],
-      "correctIndex": 2,
-      "explanation": "The lesson teaches that belief must come from revelation, not guesses."
+      "correctIndex": 3,
+      "explanation": "Correct Islamic belief comes from the Qur'an and the Sunnah (the way of the Prophet Muhammad ﷺ). Islam is based on revelation, not emotions."
     },
     {
       "id": "l3-q5",
       "type": "multiple-choice",
-      "question": "What is the key takeaway of Lesson 3?",
+      "question": "Which of the following is part of belief in Divine Decree (Qadr)?",
       "choices": [
-        "Actions matter more than belief",
-        "Belief is optional",
-        "Correct belief comes first and actions are built on it",
-        "Copy others without understanding"
+        "Everything happens by chance",
+        "Allah only knows the future",
+        "Everything happens by the will of Allah",
+        "Humans control everything"
       ],
       "correctIndex": 2,
-      "explanation": "The lesson ends by teaching that belief is the foundation of Islam."
+      "explanation": "Belief in Qadr includes believing that everything happens by the will of Allah, and that Allah knows everything — past, present, and future."
     }
   ]
 }
