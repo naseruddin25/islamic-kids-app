@@ -193,6 +193,7 @@
         if (fallbackLink) {
           fallbackLink.href = audioUrl;
           fallbackLink.style.display = 'inline-block';
+          fallbackLink.setAttribute('aria-label', `Open ${narrator} narrator audio in new tab`);
         }
         console.log('[Audio] Set narrator to:', narrator, '| src:', audioUrl);
         clearError();

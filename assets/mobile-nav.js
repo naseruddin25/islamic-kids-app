@@ -19,9 +19,15 @@
 
     // Guard: elements must exist
     if (!hamburger || !drawer || !drawerContent) {
-      console.warn('[MobileNav] Required elements not found');
+      console.warn('[MobileNav] Required elements not found:', {
+        hamburger: !!hamburger,
+        drawer: !!drawer,
+        drawerContent: !!drawerContent
+      });
       return;
     }
+
+    console.log('[MobileNav] All required elements found, initializing...');
 
     // State: track scroll position for iOS Safari
     let scrollY = 0;
@@ -77,6 +83,7 @@
     hamburger.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      console.log('[MobileNav] Hamburger clicked, current state:', drawer.classList.contains('open') ? 'open' : 'closed');
       toggleDrawer();
     }, false);
 
